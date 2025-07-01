@@ -130,7 +130,7 @@ const UploadSection = () => {
                   <SelectValue placeholder="Select action..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="walks">Walks</SelectItem>
+                  <SelectItem value="moves">Moves</SelectItem>
                   <SelectItem value="runs">Runs</SelectItem>
                   <SelectItem value="flies">Flies</SelectItem>
                   <SelectItem value="drives">Drives</SelectItem>
