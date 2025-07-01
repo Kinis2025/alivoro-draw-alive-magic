@@ -1,15 +1,17 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Upload, Play } from 'lucide-react';
+import { Upload, Play, LoaderCircle, Download } from 'lucide-react';
 
 const UploadSection = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [drawingType, setDrawingType] = useState('');
   const [action, setAction] = useState('');
   const [environment, setEnvironment] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -18,14 +20,48 @@ const UploadSection = () => {
     }
   };
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
+    setError(null);
+    setVideoUrl(null);
+
     if (!selectedFile || !drawingType || !action || !environment) {
-      alert('Please fill in all fields before generating!');
+      setError('Please fill in all fields before generating!');
       return;
     }
-    // This is where the API call would happen
-    console.log('Generating video with:', { selectedFile, drawingType, action, environment });
-    alert('Video generation would start here! (Demo only)');
+
+    const formData = new FormData();
+    formData.append("image", selectedFile);
+    formData.append("drawingType", drawingType);
+    formData.append("action", action);
+    formData.append("environment", environment);
+
+    try {
+      setLoading(true);
+
+      const response = await fetch("https://alivoro-server.onrender.com/api/generate", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log("Video generation result:", data);
+
+      if (data.videoUrl) {
+        setVideoUrl(data.videoUrl);
+      } else {
+        setError("Video generation succeeded but no video URL was returned.");
+      }
+
+    } catch (error) {
+      console.error("Error generating video:", error);
+      setError("Failed to generate video. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -49,6 +85,14 @@ const UploadSection = () => {
             <CardTitle className="text-2xl text-gray-900">Create Your Magic</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
+
+            {/* Error message */}
+            {error && (
+              <div className="bg-red-100 text-red-700 px-4 py-3 rounded-lg">
+                {error}
+              </div>
+            )}
+
             {/* File Upload */}
             <div className="space-y-2">
               <label className="text-lg font-semibold text-gray-900 flex items-center">
@@ -136,19 +180,32 @@ const UploadSection = () => {
             {/* Generate Button */}
             <Button
               onClick={handleGenerate}
+              disabled={loading}
               className="w-full h-14 text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 transition-all duration-200 transform hover:scale-105"
             >
-              <Play className="w-6 h-6 mr-2" />
-              Generate Video
+              {loading ? (
+                <LoaderCircle className="w-6 h-6 mr-2 animate-spin" />
+              ) : (
+                <Play className="w-6 h-6 mr-2" />
+              )}
+              {loading ? "Generating..." : "Generate Video"}
             </Button>
 
-            {/* Video Placeholder */}
-            <div className="mt-8 p-12 bg-gray-100 rounded-lg text-center border-2 border-dashed border-gray-300">
-              <Play className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <p className="text-lg text-gray-600 font-medium">
-                Your magical video will appear here.
-              </p>
-            </div>
+            {/* Video Result */}
+            {videoUrl && (
+              <div className="mt-8 p-4 bg-gray-100 rounded-lg text-center border-2 border-dashed border-gray-300">
+                <video controls src={videoUrl} className="mx-auto rounded-lg mb-4" />
+                <a
+                  href={videoUrl}
+                  download
+                  className="inline-flex items-center bg-green-600 text-white px-6 py-3 rounded-full hover:bg-green-700 transition-colors font-semibold"
+                >
+                  <Download className="w-5 h-5 mr-2" />
+                  Download Video
+                </a>
+              </div>
+            )}
+
           </CardContent>
         </Card>
       </div>
