@@ -6,7 +6,6 @@ import { Upload, Play, LoaderCircle, Download } from 'lucide-react';
 
 const UploadSection = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [drawingType, setDrawingType] = useState('');
   const [action, setAction] = useState('');
   const [environment, setEnvironment] = useState('');
   const [ratio, setRatio] = useState('');
@@ -26,14 +25,13 @@ const UploadSection = () => {
     setError(null);
     setVideoUrl(null);
 
-    if (!selectedFile || !drawingType || !action || !environment || !ratio || !duration) {
+    if (!selectedFile || !action || !environment || !ratio || !duration) {
       setError('Please fill in all fields before generating!');
       return;
     }
 
     const formData = new FormData();
     formData.append("image", selectedFile);
-    formData.append("drawingType", drawingType);
     formData.append("action", action);
     formData.append("environment", environment);
     formData.append("ratio", ratio);
@@ -125,23 +123,6 @@ const UploadSection = () => {
 
             <div className="space-y-2">
               <label className="text-lg font-semibold text-gray-900 flex items-center">
-                🔹 Choose What's in the Drawing:
-              </label>
-              <Select value={drawingType} onValueChange={setDrawingType}>
-                <SelectTrigger className="w-full h-12 text-lg">
-                  <SelectValue placeholder="Select drawing type..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="animal">Animal</SelectItem>
-                  <SelectItem value="car">Car</SelectItem>
-                  <SelectItem value="monster">Monster</SelectItem>
-                  <SelectItem value="fantasy-creature">Fantasy Creature</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-lg font-semibold text-gray-900 flex items-center">
                 🔹 Choose What It Does:
               </label>
               <Select value={action} onValueChange={setAction}>
@@ -149,11 +130,11 @@ const UploadSection = () => {
                   <SelectValue placeholder="Select action..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="walks-forward">Walks forward</SelectItem>
-                  <SelectItem value="runs-forward">Runs forward</SelectItem>
-                  <SelectItem value="flies-forward">Flies forward</SelectItem>
-                  <SelectItem value="drives-forward">Drives forward</SelectItem>
-                  <SelectItem value="jumps-happily">Jumps happily</SelectItem>
+                  <SelectItem value="walks forward">Walks forward</SelectItem>
+                  <SelectItem value="runs forward">Runs forward</SelectItem>
+                  <SelectItem value="flies forward">Flies forward</SelectItem>
+                  <SelectItem value="drives forward">Drives forward</SelectItem>
+                  <SelectItem value="jumps happily">Jumps happily</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -168,10 +149,11 @@ const UploadSection = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="forest">Forest</SelectItem>
-                  <SelectItem value="city-street">City street</SelectItem>
+                  <SelectItem value="city street">City street</SelectItem>
                   <SelectItem value="racetrack">Racetrack</SelectItem>
                   <SelectItem value="sky">Sky</SelectItem>
-                  <SelectItem value="magical-world">Magical world</SelectItem>
+                  <SelectItem value="magical world">Magical world</SelectItem>
+                  <SelectItem value="desert">Desert</SelectItem>
                 </SelectContent>
               </Select>
             </div>
