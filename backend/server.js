@@ -12,7 +12,7 @@ const port = process.env.PORT || 10000;
 app.use(cors());
 const upload = multer({ storage: multer.memoryStorage() });
 
-const WAIT_TIME_MS = 3000; // cik ilgi gaidīt starp polling pieprasījumiem
+const WAIT_TIME_MS = 3000;
 
 async function pollTaskStatus(taskId, apiKey) {
   const url = `https://api.dev.runwayml.com/v1/tasks/${taskId}`;
@@ -35,7 +35,6 @@ async function pollTaskStatus(taskId, apiKey) {
       throw new Error('Video generation failed');
     }
 
-    // Ja statuss nav pabeigts, pagaidīt un atkārtot
     await new Promise(resolve => setTimeout(resolve, WAIT_TIME_MS));
   }
 }
@@ -46,9 +45,10 @@ app.post('/api/generate', upload.single('image'), async (req, res) => {
 
     console.log("📝 Received form data:", { drawingType, action, environment, duration, ratio });
 
+    // Šeit jābūt atslēgām, ko frontend tieši sūta:
     const validRatios = {
-      "landscape": { width: 1280, height: 720, runwayRatio: "1280:720" },
-      "portrait": { width: 720, height: 1280, runwayRatio: "720:1280" },
+      "1280:720": { width: 1280, height: 720, runwayRatio: "1280:720" },
+      "720:1280": { width: 720, height: 1280, runwayRatio: "720:1280" },
     };
 
     if (!validRatios[ratio]) {
@@ -65,7 +65,6 @@ app.post('/api/generate', upload.single('image'), async (req, res) => {
       return res.status(500).json({ error: "Server misconfiguration: Missing API key." });
     }
 
-    // Resize image with Sharp
     const resizedImageBuffer = await sharp(req.file.buffer)
       .resize({ width, height, fit: 'contain', background: { r: 0, g: 0, b: 0 } })
       .toFormat('jpeg')
@@ -74,7 +73,6 @@ app.post('/api/generate', upload.single('image'), async (req, res) => {
     const base64Image = resizedImageBuffer.toString('base64');
     const dataUri = `data:image/jpeg;base64,${base64Image}`;
 
-    // Call Runway API to start task
     const response = await fetch('https://api.dev.runwayml.com/v1/image_to_video', {
       method: 'POST',
       headers: {
@@ -101,10 +99,8 @@ app.post('/api/generate', upload.single('image'), async (req, res) => {
 
     console.log('✅ Runway video task created:', data);
 
-    // Poll until video generation is complete
     const taskResult = await pollTaskStatus(data.id, process.env.RUNWAY_API_KEY);
 
-    // Atgriež video URL frontendam
     res.json({ video_url: taskResult.output?.videoUri || taskResult.output?.videoUrl || null });
 
   } catch (err) {
