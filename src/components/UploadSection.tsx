@@ -54,8 +54,8 @@ const UploadSection = () => {
       const data = await response.json();
       console.log("Video generation result:", data);
 
-      if (data.videoUrl) {
-        setVideoUrl(data.videoUrl);
+      if (data.video_url) {
+        setVideoUrl(data.video_url);
       } else {
         setError("Video generation succeeded but no video URL was returned.");
       }
@@ -191,9 +191,8 @@ const UploadSection = () => {
                   <SelectValue placeholder="Select aspect ratio..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="square">Square (1:1)</SelectItem>
-                  <SelectItem value="landscape">Landscape (16:9)</SelectItem>
-                  <SelectItem value="portrait">Portrait (9:16)</SelectItem>
+                  <SelectItem value="720:1280">Portrait (9:16)</SelectItem>
+                  <SelectItem value="1280:720">Landscape (16:9)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
