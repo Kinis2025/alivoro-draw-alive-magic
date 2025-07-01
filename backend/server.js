@@ -18,17 +18,14 @@ app.post('/api/generate', upload.single('image'), async (req, res) => {
 
     console.log("📝 Received form data:", { drawingType, action, environment, duration, ratio });
 
-    const validRatios = {
-      "landscape": { width: 1280, height: 720, runwayRatio: "1280:720" },
-      "portrait": { width: 720, height: 1280, runwayRatio: "720:1280" },
-    };
-
-    if (!validRatios[ratio]) {
+    // ✅ Only accept valid ratios per Runway docs
+    const validRatios = ["1280:720", "720:1280"];
+    if (!validRatios.includes(ratio)) {
       console.error("❌ Invalid ratio:", ratio);
       return res.status(400).json({ error: 'Invalid ratio selected.' });
     }
 
-    const { width, height, runwayRatio } = validRatios[ratio];
+    const [width, height] = ratio.split(':').map(Number);
     const promptText = `A ${drawingType} ${action} in a ${environment}.`;
     console.log("📝 Prompt text generated:", promptText);
 
@@ -37,16 +34,15 @@ app.post('/api/generate', upload.single('image'), async (req, res) => {
       return res.status(500).json({ error: "Server misconfiguration: Missing API key." });
     }
 
-    // Resize image with Sharp
+    // ✅ Resize image
     const resizedImageBuffer = await sharp(req.file.buffer)
       .resize({ width, height, fit: 'contain', background: { r: 0, g: 0, b: 0 } })
       .toFormat('jpeg')
       .toBuffer();
 
-    const base64Image = resizedImageBuffer.toString('base64');
-    const dataUri = `data:image/jpeg;base64,${base64Image}`;
+    const dataUri = `data:image/jpeg;base64,${resizedImageBuffer.toString('base64')}`;
 
-    // Call Runway API
+    // ✅ Call Runway API
     const response = await fetch('https://api.dev.runwayml.com/v1/image_to_video', {
       method: 'POST',
       headers: {
@@ -58,7 +54,7 @@ app.post('/api/generate', upload.single('image'), async (req, res) => {
         model: 'gen4_turbo',
         promptText,
         duration: parseInt(duration),
-        ratio: runwayRatio,
+        ratio,
         promptImage: dataUri,
         contentModeration: { publicFigureThreshold: 'auto' },
       }),
@@ -67,7 +63,7 @@ app.post('/api/generate', upload.single('image'), async (req, res) => {
     const data = await response.json();
 
     if (!response.ok) {
-      console.error('❌ Runway API error response:', data);
+      console.error('❌ Runway API error:', data);
       return res.status(500).json({ error: data.error || 'Runway API error.' });
     }
 
