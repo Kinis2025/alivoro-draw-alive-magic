@@ -55,7 +55,7 @@ const UploadSection = () => {
       console.log("Video generation result:", data);
 
       if (data.video_url) {
-        setVideoUrl(data.video_url);
+        await pollForVideo(data.video_url);
       } else {
         setError("Video generation succeeded but no video URL was returned.");
       }
@@ -65,6 +65,45 @@ const UploadSection = () => {
       setError("Failed to generate video. Please try again.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  // ✅ Polling function to check task status
+  const pollForVideo = async (taskUrl: string) => {
+    try {
+      const maxAttempts = 20;
+      let attempts = 0;
+
+      while (attempts < maxAttempts) {
+        const response = await fetch(taskUrl, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${process.env.NEXT_PUBLIC_RUNWAY_API_KEY}`,
+            "X-Runway-Version": "2024-11-06",
+          },
+        });
+
+        const data = await response.json();
+        console.log("Task status check:", data);
+
+        if (data.status === "COMPLETED" && data.outputs?.[0]?.uri) {
+          setVideoUrl(data.outputs[0].uri);
+          return;
+        } else if (data.status === "FAILED") {
+          setError("Video generation failed.");
+          return;
+        }
+
+        // Wait 5 seconds before next poll
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+        attempts++;
+      }
+
+      setError("Video generation timed out. Please try again.");
+
+    } catch (error) {
+      console.error("Error polling video status:", error);
+      setError("Error fetching video status.");
     }
   };
 
@@ -90,14 +129,12 @@ const UploadSection = () => {
           </CardHeader>
           <CardContent className="space-y-6">
 
-            {/* Error message */}
             {error && (
               <div className="bg-red-100 text-red-700 px-4 py-3 rounded-lg">
                 {error}
               </div>
             )}
 
-            {/* File Upload */}
             <div className="space-y-2">
               <label className="text-lg font-semibold text-gray-900 flex items-center">
                 🔹 Upload Drawing:
@@ -126,108 +163,52 @@ const UploadSection = () => {
             </div>
 
             {/* Drawing Type */}
-            <div className="space-y-2">
-              <label className="text-lg font-semibold text-gray-900 flex items-center">
-                🔹 Choose What's in the Drawing:
-              </label>
-              <Select value={drawingType} onValueChange={setDrawingType}>
-                <SelectTrigger className="w-full h-12 text-lg">
-                  <SelectValue placeholder="Select drawing type..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="animal">Animal</SelectItem>
-                  <SelectItem value="car">Car</SelectItem>
-                  <SelectItem value="monster">Monster</SelectItem>
-                  <SelectItem value="fantasy-creature">Fantasy Creature</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            <SelectInput label="Choose What's in the Drawing:" value={drawingType} setValue={setDrawingType} options={[
+              { value: 'animal', label: 'Animal' },
+              { value: 'car', label: 'Car' },
+              { value: 'monster', label: 'Monster' },
+              { value: 'fantasy-creature', label: 'Fantasy Creature' },
+            ]} />
 
             {/* Action */}
-            <div className="space-y-2">
-              <label className="text-lg font-semibold text-gray-900 flex items-center">
-                🔹 Choose What It Does:
-              </label>
-              <Select value={action} onValueChange={setAction}>
-                <SelectTrigger className="w-full h-12 text-lg">
-                  <SelectValue placeholder="Select action..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="walks-forward">Walks forward</SelectItem>
-                  <SelectItem value="runs-forward">Runs forward</SelectItem>
-                  <SelectItem value="flies-forward">Flies forward</SelectItem>
-                  <SelectItem value="drives-forward">Drives forward</SelectItem>
-                  <SelectItem value="jumps-happily">Jumps happily</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            <SelectInput label="Choose What It Does:" value={action} setValue={setAction} options={[
+              { value: 'walks-forward', label: 'Walks forward' },
+              { value: 'runs-forward', label: 'Runs forward' },
+              { value: 'flies-forward', label: 'Flies forward' },
+              { value: 'drives-forward', label: 'Drives forward' },
+              { value: 'jumps-happily', label: 'Jumps happily' },
+            ]} />
 
             {/* Environment */}
-            <div className="space-y-2">
-              <label className="text-lg font-semibold text-gray-900 flex items-center">
-                🔹 Choose Environment:
-              </label>
-              <Select value={environment} onValueChange={setEnvironment}>
-                <SelectTrigger className="w-full h-12 text-lg">
-                  <SelectValue placeholder="Select environment..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="forest">Forest</SelectItem>
-                  <SelectItem value="city-street">City street</SelectItem>
-                  <SelectItem value="racetrack">Racetrack</SelectItem>
-                  <SelectItem value="sky">Sky</SelectItem>
-                  <SelectItem value="magical-world">Magical world</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            <SelectInput label="Choose Environment:" value={environment} setValue={setEnvironment} options={[
+              { value: 'forest', label: 'Forest' },
+              { value: 'city-street', label: 'City street' },
+              { value: 'racetrack', label: 'Racetrack' },
+              { value: 'sky', label: 'Sky' },
+              { value: 'magical-world', label: 'Magical world' },
+            ]} />
 
             {/* Aspect Ratio */}
-            <div className="space-y-2">
-              <label className="text-lg font-semibold text-gray-900 flex items-center">
-                🔹 Choose Video Aspect Ratio:
-              </label>
-              <Select value={ratio} onValueChange={setRatio}>
-                <SelectTrigger className="w-full h-12 text-lg">
-                  <SelectValue placeholder="Select aspect ratio..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="720:1280">Portrait (9:16)</SelectItem>
-                  <SelectItem value="1280:720">Landscape (16:9)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            <SelectInput label="Choose Video Aspect Ratio:" value={ratio} setValue={setRatio} options={[
+              { value: '720:1280', label: 'Portrait (9:16)' },
+              { value: '1280:720', label: 'Landscape (16:9)' },
+            ]} />
 
             {/* Duration */}
-            <div className="space-y-2">
-              <label className="text-lg font-semibold text-gray-900 flex items-center">
-                🔹 Choose Video Duration:
-              </label>
-              <Select value={duration} onValueChange={setDuration}>
-                <SelectTrigger className="w-full h-12 text-lg">
-                  <SelectValue placeholder="Select duration..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="5">5 seconds</SelectItem>
-                  <SelectItem value="10">10 seconds</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            <SelectInput label="Choose Video Duration:" value={duration} setValue={setDuration} options={[
+              { value: '5', label: '5 seconds' },
+              { value: '10', label: '10 seconds' },
+            ]} />
 
-            {/* Generate Button */}
             <Button
               onClick={handleGenerate}
               disabled={loading}
               className="w-full h-14 text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 transition-all duration-200 transform hover:scale-105"
             >
-              {loading ? (
-                <LoaderCircle className="w-6 h-6 mr-2 animate-spin" />
-              ) : (
-                <Play className="w-6 h-6 mr-2" />
-              )}
+              {loading ? <LoaderCircle className="w-6 h-6 mr-2 animate-spin" /> : <Play className="w-6 h-6 mr-2" />}
               {loading ? "Generating..." : "Generate Video"}
             </Button>
 
-            {/* Video Result */}
             {videoUrl && (
               <div className="mt-8 p-4 bg-gray-100 rounded-lg text-center border-2 border-dashed border-gray-300">
                 <video controls src={videoUrl} className="mx-auto rounded-lg mb-4" />
@@ -248,5 +229,24 @@ const UploadSection = () => {
     </section>
   );
 };
+
+// ✅ Reusable SelectInput component
+const SelectInput = ({ label, value, setValue, options }) => (
+  <div className="space-y-2">
+    <label className="text-lg font-semibold text-gray-900 flex items-center">
+      🔹 {label}
+    </label>
+    <Select value={value} onValueChange={setValue}>
+      <SelectTrigger className="w-full h-12 text-lg">
+        <SelectValue placeholder="Select..." />
+      </SelectTrigger>
+      <SelectContent>
+        {options.map((opt) => (
+          <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  </div>
+);
 
 export default UploadSection;
