@@ -12,8 +12,6 @@ const port = process.env.PORT || 10000;
 app.use(cors());
 const upload = multer({ storage: multer.memoryStorage() });
 
-const WAIT_TIME_MS = 3000;
-
 async function pollTaskStatus(taskId, apiKey) {
   const url = `https://api.dev.runwayml.com/v1/tasks/${taskId}`;
   const headers = {
@@ -22,20 +20,27 @@ async function pollTaskStatus(taskId, apiKey) {
   };
 
   while (true) {
+    console.log(`🔄 Polling task status for ${taskId}...`);
+
     const response = await fetch(url, { headers });
     const data = await response.json();
 
     if (!response.ok) {
+      console.error('❌ Error fetching task status:', data);
       throw new Error(data.error || 'Failed to get task status');
     }
 
+    console.log(`🕒 Task status: ${data.status}`);
+
     if (data.status === 'COMPLETED') {
+      console.log('✅ Task completed:', data);
       return data;
     } else if (data.status === 'FAILED') {
+      console.error('❌ Video generation failed');
       throw new Error('Video generation failed');
     }
 
-    await new Promise(resolve => setTimeout(resolve, WAIT_TIME_MS));
+    await new Promise(resolve => setTimeout(resolve, 2000));
   }
 }
 
@@ -45,7 +50,6 @@ app.post('/api/generate', upload.single('image'), async (req, res) => {
 
     console.log("📝 Received form data:", { drawingType, action, environment, duration, ratio });
 
-    // Šeit jābūt atslēgām, ko frontend tieši sūta:
     const validRatios = {
       "1280:720": { width: 1280, height: 720, runwayRatio: "1280:720" },
       "720:1280": { width: 720, height: 1280, runwayRatio: "720:1280" },
