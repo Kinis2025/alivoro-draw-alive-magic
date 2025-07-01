@@ -13,35 +13,33 @@ app.use(cors());
 const upload = multer({ storage: multer.memoryStorage() });
 
 async function pollTaskStatus(taskId, apiKey) {
-  const url = `https://api.dev.runwayml.com/v1/tasks/${taskId}`;
-  const headers = {
-    Authorization: `Bearer ${apiKey}`,
-    'X-Runway-Version': '2024-11-06',
-  };
+  const maxRetries = 60; // max 60 reizes, aptuveni 3 minūtes (3s intervāls)
+  const intervalMs = 3000;
 
-  while (true) {
-    console.log(`🔄 Polling task status for ${taskId}...`);
+  for (let i = 0; i < maxRetries; i++) {
+    const res = await fetch(`https://api.dev.runwayml.com/v1/tasks/${taskId}`, {
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'X-Runway-Version': '2024-11-06',
+      },
+    });
 
-    const response = await fetch(url, { headers });
-    const data = await response.json();
-
-    if (!response.ok) {
-      console.error('❌ Error fetching task status:', data);
-      throw new Error(data.error || 'Failed to get task status');
+    if (!res.ok) {
+      throw new Error(`Failed to fetch task status: ${res.statusText}`);
     }
 
-    console.log(`🕒 Task status: ${data.status}`);
-
-    if (data.status === 'COMPLETED' || data.status === 'SUCCEEDED') {
-      console.log('✅ Task completed:', data);
-      return data;
-    } else if (data.status === 'FAILED') {
-      console.error('❌ Video generation failed');
-      throw new Error('Video generation failed');
+    const json = await res.json();
+    if (json.status === 'SUCCEEDED') {
+      return json;
+    }
+    if (json.status === 'FAILED' || json.status === 'CANCELED') {
+      throw new Error(`Task ${json.status.toLowerCase()}`);
     }
 
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    // gaidīt
+    await new Promise((r) => setTimeout(r, intervalMs));
   }
+  throw new Error('Task polling timed out');
 }
 
 app.post('/api/generate', upload.single('image'), async (req, res) => {
@@ -51,8 +49,8 @@ app.post('/api/generate', upload.single('image'), async (req, res) => {
     console.log("📝 Received form data:", { drawingType, action, environment, duration, ratio });
 
     const validRatios = {
-      "1280:720": { width: 1280, height: 720, runwayRatio: "1280:720" },
-      "720:1280": { width: 720, height: 1280, runwayRatio: "720:1280" },
+      "1280:720": { width: 1280, height: 720 },
+      "720:1280": { width: 720, height: 1280 },
     };
 
     if (!validRatios[ratio]) {
@@ -60,7 +58,7 @@ app.post('/api/generate', upload.single('image'), async (req, res) => {
       return res.status(400).json({ error: 'Invalid ratio selected.' });
     }
 
-    const { width, height, runwayRatio } = validRatios[ratio];
+    const { width, height } = validRatios[ratio];
     const promptText = `A ${drawingType} ${action} in a ${environment}.`;
     console.log("📝 Prompt text generated:", promptText);
 
@@ -69,6 +67,7 @@ app.post('/api/generate', upload.single('image'), async (req, res) => {
       return res.status(500).json({ error: "Server misconfiguration: Missing API key." });
     }
 
+    // Resize image with Sharp
     const resizedImageBuffer = await sharp(req.file.buffer)
       .resize({ width, height, fit: 'contain', background: { r: 0, g: 0, b: 0 } })
       .toFormat('jpeg')
@@ -77,7 +76,8 @@ app.post('/api/generate', upload.single('image'), async (req, res) => {
     const base64Image = resizedImageBuffer.toString('base64');
     const dataUri = `data:image/jpeg;base64,${base64Image}`;
 
-    const response = await fetch('https://api.dev.runwayml.com/v1/image_to_video', {
+    // Call Runway API to start video generation
+    const startResponse = await fetch('https://api.dev.runwayml.com/v1/image_to_video', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -87,26 +87,31 @@ app.post('/api/generate', upload.single('image'), async (req, res) => {
       body: JSON.stringify({
         model: 'gen4_turbo',
         promptText,
-        duration: parseInt(duration),
-        ratio: runwayRatio,
+        duration: parseInt(duration, 10),
+        ratio,
         promptImage: dataUri,
         contentModeration: { publicFigureThreshold: 'auto' },
       }),
     });
 
-    const data = await response.json();
+    const data = await startResponse.json();
 
-    if (!response.ok) {
+    if (!startResponse.ok) {
       console.error('❌ Runway API error response:', data);
       return res.status(500).json({ error: data.error || 'Runway API error.' });
     }
 
     console.log('✅ Runway video task created:', data);
 
+    // Poll for completion
     const taskResult = await pollTaskStatus(data.id, process.env.RUNWAY_API_KEY);
 
-    // Izsūtīt atpakaļ video URL klientam
-    res.json({ video_url: taskResult.output?.videoUri || taskResult.output?.videoUrl || null });
+    console.log('✅ Task completed:', taskResult);
+
+    // Send back the first video URL from output array
+    const videoUrl = Array.isArray(taskResult.output) ? taskResult.output[0] : null;
+
+    res.json({ video_url: videoUrl });
 
   } catch (err) {
     console.error('❌ Internal server error:', err);
