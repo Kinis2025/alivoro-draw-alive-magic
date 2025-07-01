@@ -9,6 +9,8 @@ const UploadSection = () => {
   const [drawingType, setDrawingType] = useState('');
   const [action, setAction] = useState('');
   const [environment, setEnvironment] = useState('');
+  const [ratio, setRatio] = useState('');
+  const [duration, setDuration] = useState('');
   const [loading, setLoading] = useState(false);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -24,7 +26,7 @@ const UploadSection = () => {
     setError(null);
     setVideoUrl(null);
 
-    if (!selectedFile || !drawingType || !action || !environment) {
+    if (!selectedFile || !drawingType || !action || !environment || !ratio || !duration) {
       setError('Please fill in all fields before generating!');
       return;
     }
@@ -34,6 +36,8 @@ const UploadSection = () => {
     formData.append("drawingType", drawingType);
     formData.append("action", action);
     formData.append("environment", environment);
+    formData.append("ratio", ratio);
+    formData.append("duration", duration);
 
     try {
       setLoading(true);
@@ -173,6 +177,39 @@ const UploadSection = () => {
                   <SelectItem value="racetrack">Racetrack</SelectItem>
                   <SelectItem value="sky">Sky</SelectItem>
                   <SelectItem value="magical-world">Magical world</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Aspect Ratio */}
+            <div className="space-y-2">
+              <label className="text-lg font-semibold text-gray-900 flex items-center">
+                🔹 Choose Video Aspect Ratio:
+              </label>
+              <Select value={ratio} onValueChange={setRatio}>
+                <SelectTrigger className="w-full h-12 text-lg">
+                  <SelectValue placeholder="Select aspect ratio..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="square">Square (1:1)</SelectItem>
+                  <SelectItem value="landscape">Landscape (16:9)</SelectItem>
+                  <SelectItem value="portrait">Portrait (9:16)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Duration */}
+            <div className="space-y-2">
+              <label className="text-lg font-semibold text-gray-900 flex items-center">
+                🔹 Choose Video Duration:
+              </label>
+              <Select value={duration} onValueChange={setDuration}>
+                <SelectTrigger className="w-full h-12 text-lg">
+                  <SelectValue placeholder="Select duration..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="5">5 seconds</SelectItem>
+                  <SelectItem value="10">10 seconds</SelectItem>
                 </SelectContent>
               </Select>
             </div>
