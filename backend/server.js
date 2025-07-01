@@ -12,45 +12,15 @@ const port = process.env.PORT || 10000;
 app.use(cors());
 const upload = multer({ storage: multer.memoryStorage() });
 
-async function pollTaskStatus(taskId, apiKey) {
-  const maxRetries = 60; // max 60 reizes, aptuveni 3 minūtes (3s intervāls)
-  const intervalMs = 3000;
-
-  for (let i = 0; i < maxRetries; i++) {
-    const res = await fetch(`https://api.dev.runwayml.com/v1/tasks/${taskId}`, {
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'X-Runway-Version': '2024-11-06',
-      },
-    });
-
-    if (!res.ok) {
-      throw new Error(`Failed to fetch task status: ${res.statusText}`);
-    }
-
-    const json = await res.json();
-    if (json.status === 'SUCCEEDED') {
-      return json;
-    }
-    if (json.status === 'FAILED' || json.status === 'CANCELED') {
-      throw new Error(`Task ${json.status.toLowerCase()}`);
-    }
-
-    // gaidīt
-    await new Promise((r) => setTimeout(r, intervalMs));
-  }
-  throw new Error('Task polling timed out');
-}
-
 app.post('/api/generate', upload.single('image'), async (req, res) => {
   try {
-    const { drawingType, action, environment, duration, ratio } = req.body;
+    const { action, environment, duration, ratio } = req.body;
 
-    console.log("📝 Received form data:", { drawingType, action, environment, duration, ratio });
+    console.log("📝 Received form data:", { action, environment, duration, ratio });
 
     const validRatios = {
-      "1280:720": { width: 1280, height: 720 },
-      "720:1280": { width: 720, height: 1280 },
+      "landscape": { width: 1280, height: 720, runwayRatio: "1280:720" },
+      "portrait": { width: 720, height: 1280, runwayRatio: "720:1280" },
     };
 
     if (!validRatios[ratio]) {
@@ -58,14 +28,16 @@ app.post('/api/generate', upload.single('image'), async (req, res) => {
       return res.status(400).json({ error: 'Invalid ratio selected.' });
     }
 
-    const { width, height } = validRatios[ratio];
-    const promptText = `A ${drawingType} ${action} in a ${environment}.`;
-    console.log("📝 Prompt text generated:", promptText);
+    const { width, height, runwayRatio } = validRatios[ratio];
 
     if (!process.env.RUNWAY_API_KEY) {
       console.error("❌ Missing RUNWAY_API_KEY.");
       return res.status(500).json({ error: "Server misconfiguration: Missing API key." });
     }
+
+    // ✅ **Universal prompt**
+    const promptText = `A realistic version of the subject in the input drawing, preserving its unique shape and form. The subject ${action} in the ${environment}. Cinematic, photorealistic, vibrant lighting, smooth animation.`;
+    console.log("📝 Prompt text generated:", promptText);
 
     // Resize image with Sharp
     const resizedImageBuffer = await sharp(req.file.buffer)
@@ -76,8 +48,8 @@ app.post('/api/generate', upload.single('image'), async (req, res) => {
     const base64Image = resizedImageBuffer.toString('base64');
     const dataUri = `data:image/jpeg;base64,${base64Image}`;
 
-    // Call Runway API to start video generation
-    const startResponse = await fetch('https://api.dev.runwayml.com/v1/image_to_video', {
+    // Call Runway API
+    const response = await fetch('https://api.runwayml.com/v1/image_to_video', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -86,36 +58,27 @@ app.post('/api/generate', upload.single('image'), async (req, res) => {
       },
       body: JSON.stringify({
         model: 'gen4_turbo',
-        promptText,
-        duration: parseInt(duration, 10),
-        ratio,
-        promptImage: dataUri,
+        prompt: promptText,
+        duration: parseInt(duration),
+        ratio: runwayRatio,
+        input_image: dataUri,
         contentModeration: { publicFigureThreshold: 'auto' },
       }),
     });
 
-    const data = await startResponse.json();
+    const data = await response.json();
 
-    if (!startResponse.ok) {
+    if (!response.ok) {
       console.error('❌ Runway API error response:', data);
       return res.status(500).json({ error: data.error || 'Runway API error.' });
     }
 
     console.log('✅ Runway video task created:', data);
-
-    // Poll for completion
-    const taskResult = await pollTaskStatus(data.id, process.env.RUNWAY_API_KEY);
-
-    console.log('✅ Task completed:', taskResult);
-
-    // Send back the first video URL from output array
-    const videoUrl = Array.isArray(taskResult.output) ? taskResult.output[0] : null;
-
-    res.json({ video_url: videoUrl });
+    res.json({ video_url: `https://api.runwayml.com/v1/tasks/${data.id}` });
 
   } catch (err) {
     console.error('❌ Internal server error:', err);
-    res.status(500).json({ error: err.message || 'Internal server error.' });
+    res.status(500).json({ error: 'Internal server error.' });
   }
 });
 
