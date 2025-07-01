@@ -32,7 +32,7 @@ async function pollTaskStatus(taskId, apiKey) {
 
     console.log(`🕒 Task status: ${data.status}`);
 
-    if (data.status === 'COMPLETED') {
+    if (data.status === 'COMPLETED' || data.status === 'SUCCEEDED') {
       console.log('✅ Task completed:', data);
       return data;
     } else if (data.status === 'FAILED') {
@@ -105,6 +105,7 @@ app.post('/api/generate', upload.single('image'), async (req, res) => {
 
     const taskResult = await pollTaskStatus(data.id, process.env.RUNWAY_API_KEY);
 
+    // Izsūtīt atpakaļ video URL klientam
     res.json({ video_url: taskResult.output?.videoUri || taskResult.output?.videoUrl || null });
 
   } catch (err) {
