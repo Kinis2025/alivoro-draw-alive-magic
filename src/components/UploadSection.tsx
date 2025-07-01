@@ -130,11 +130,11 @@ const UploadSection = () => {
                   <SelectValue placeholder="Select action..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="walks forward">Walks forward</SelectItem>
-                  <SelectItem value="runs forward">Runs forward</SelectItem>
-                  <SelectItem value="flies forward">Flies forward</SelectItem>
-                  <SelectItem value="drives forward">Drives forward</SelectItem>
-                  <SelectItem value="jumps happily">Jumps happily</SelectItem>
+                  <SelectItem value="walks">Walks</SelectItem>
+                  <SelectItem value="runs">Runs</SelectItem>
+                  <SelectItem value="flies">Flies</SelectItem>
+                  <SelectItem value="drives">Drives</SelectItem>
+                  <SelectItem value="jumps">Jumps</SelectItem>
                 </SelectContent>
               </Select>
             </div>
