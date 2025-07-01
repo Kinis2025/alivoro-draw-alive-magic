@@ -31,6 +31,13 @@ app.post('/api/generate', upload.single('image'), async (req, res) => {
     // ✅ Build prompt text dynamically
     const promptText = `A ${drawingType} ${action} in a ${environment}.`;
 
+    // ✅ Check if API Key exists
+    const apiKey = process.env.RUNWAY_API_KEY;
+    if (!apiKey) {
+      console.error("❌ Missing RUNWAY_API_KEY in environment variables.");
+      return res.status(500).json({ error: "Server misconfiguration. Please contact support." });
+    }
+
     // ✅ Prepare image (resize with background)
     const resizedImageBuffer = await sharp(req.file.buffer)
       .resize({
@@ -50,7 +57,7 @@ app.post('/api/generate', upload.single('image'), async (req, res) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${process.env.RUNWAY_API_KEY}`,
+        Authorization: `Bearer ${apiKey}`,
         'X-Runway-Version': '2024-11-06',
       },
       body: JSON.stringify({
@@ -68,18 +75,20 @@ app.post('/api/generate', upload.single('image'), async (req, res) => {
     const data = await response.json();
 
     if (!response.ok) {
-      console.error('Runway error:', data);
+      console.error('❌ Runway API error:', data);
       return res.status(500).json({ error: data.error || 'Runway API error.' });
     }
+
+    console.log('✅ Video generation initiated:', data);
 
     res.json({ video_url: `https://api.dev.runwayml.com/v1/tasks/${data.id}` });
 
   } catch (err) {
-    console.error(err);
+    console.error('❌ Internal server error:', err);
     res.status(500).json({ error: 'Internal server error.' });
   }
 });
 
 app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+  console.log(`🚀 Server running on port ${port}`);
 });
