@@ -20,7 +20,7 @@ const HowItWorks = () => {
     {
       icon: Video,
       title: "Generate the Video",
-      description: "Alivoro's AI brings the drawing to life as a realistic or cartoon video, ready to watch and share.",
+      description: "Alivoro's AI brings the drawing to life as a realistic video, ready to watch and share.",
       color: "from-blue-500 to-blue-600"
     },
     {
