@@ -14,7 +14,7 @@ const HowItWorks = () => {
     {
       icon: Play,
       title: "Choose the Animation",
-      description: "Select what's in the drawing – a car, animal, or fantasy creature – and where it comes to life.",
+      description: "Select what your drawing does – runs, flies, drives – and the environment it comes to life in.",
       color: "from-pink-500 to-pink-600"
     },
     {
