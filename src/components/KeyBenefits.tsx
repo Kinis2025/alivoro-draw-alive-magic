@@ -37,7 +37,6 @@ const KeyBenefits = () => {
         <div className="text-center mb-16">
           <div className="flex items-center justify-center space-x-2 mb-4">
             <span className="text-3xl">🚀</span>
-            <span className="text-3xl">🪄</span>
           </div>
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
             Why Choose Alivoro?
@@ -57,7 +56,7 @@ const KeyBenefits = () => {
                   </div>
                   <div>
                     <h3 className="text-xl font-semibold text-gray-900 mb-2 flex items-center">
-                      ✔️ {benefit.title}
+                      {benefit.title}
                     </h3>
                     <p className="text-gray-600 leading-relaxed">
                       {benefit.description}
@@ -72,7 +71,6 @@ const KeyBenefits = () => {
         <div className="text-center mt-16 p-8 bg-white/70 backdrop-blur-sm rounded-2xl">
           <div className="flex items-center justify-center space-x-2 mb-4">
             <span className="text-3xl">🌟</span>
-            <span className="text-3xl">💡</span>
           </div>
           <h3 className="text-3xl font-bold text-gray-900 mb-4">
             "Your child's artwork deserves to come alive."

@@ -16,8 +16,6 @@ const Footer = () => {
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center space-x-2 mb-4">
-            <span className="text-3xl">💼</span>
-            <span className="text-3xl">🔗</span>
           </div>
           <h3 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
             Alivoro

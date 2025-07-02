@@ -6,7 +6,6 @@ import { Upload, Play, LoaderCircle, Download } from 'lucide-react';
 
 const UploadSection = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [drawingType, setDrawingType] = useState('');
   const [action, setAction] = useState('');
   const [environment, setEnvironment] = useState('');
   const [ratio, setRatio] = useState('');
@@ -26,14 +25,13 @@ const UploadSection = () => {
     setError(null);
     setVideoUrl(null);
 
-    if (!selectedFile || !drawingType || !action || !environment || !ratio || !duration) {
+    if (!selectedFile || !action || !environment || !ratio || !duration) {
       setError('Please fill in all fields before generating!');
       return;
     }
 
     const formData = new FormData();
     formData.append("image", selectedFile);
-    formData.append("drawingType", drawingType);
     formData.append("action", action);
     formData.append("environment", environment);
     formData.append("ratio", ratio);
@@ -54,8 +52,8 @@ const UploadSection = () => {
       const data = await response.json();
       console.log("Video generation result:", data);
 
-      if (data.videoUrl) {
-        setVideoUrl(data.videoUrl);
+      if (data.video_url) {
+        setVideoUrl(data.video_url);
       } else {
         setError("Video generation succeeded but no video URL was returned.");
       }
@@ -69,12 +67,11 @@ const UploadSection = () => {
   };
 
   return (
-    <section className="py-20 px-4 bg-white">
+    <section id="upload" className="py-20 px-4 bg-white">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
           <div className="flex items-center justify-center space-x-2 mb-4">
             <span className="text-3xl">📸</span>
-            <span className="text-3xl">🖼️</span>
           </div>
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
             Upload Your Drawing and Generate Video
@@ -90,14 +87,12 @@ const UploadSection = () => {
           </CardHeader>
           <CardContent className="space-y-6">
 
-            {/* Error message */}
             {error && (
               <div className="bg-red-100 text-red-700 px-4 py-3 rounded-lg">
                 {error}
               </div>
             )}
 
-            {/* File Upload */}
             <div className="space-y-2">
               <label className="text-lg font-semibold text-gray-900 flex items-center">
                 🔹 Upload Drawing:
@@ -125,25 +120,6 @@ const UploadSection = () => {
               </div>
             </div>
 
-            {/* Drawing Type */}
-            <div className="space-y-2">
-              <label className="text-lg font-semibold text-gray-900 flex items-center">
-                🔹 Choose What's in the Drawing:
-              </label>
-              <Select value={drawingType} onValueChange={setDrawingType}>
-                <SelectTrigger className="w-full h-12 text-lg">
-                  <SelectValue placeholder="Select drawing type..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="animal">Animal</SelectItem>
-                  <SelectItem value="car">Car</SelectItem>
-                  <SelectItem value="monster">Monster</SelectItem>
-                  <SelectItem value="fantasy-creature">Fantasy Creature</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Action */}
             <div className="space-y-2">
               <label className="text-lg font-semibold text-gray-900 flex items-center">
                 🔹 Choose What It Does:
@@ -153,16 +129,15 @@ const UploadSection = () => {
                   <SelectValue placeholder="Select action..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="walks-forward">Walks forward</SelectItem>
-                  <SelectItem value="runs-forward">Runs forward</SelectItem>
-                  <SelectItem value="flies-forward">Flies forward</SelectItem>
-                  <SelectItem value="drives-forward">Drives forward</SelectItem>
-                  <SelectItem value="jumps-happily">Jumps happily</SelectItem>
+                  <SelectItem value="moves">Moves</SelectItem>
+                  <SelectItem value="runs">Runs</SelectItem>
+                  <SelectItem value="flies">Flies</SelectItem>
+                  <SelectItem value="drives">Drives</SelectItem>
+                  <SelectItem value="jumps">Jumps</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            {/* Environment */}
             <div className="space-y-2">
               <label className="text-lg font-semibold text-gray-900 flex items-center">
                 🔹 Choose Environment:
@@ -173,15 +148,15 @@ const UploadSection = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="forest">Forest</SelectItem>
-                  <SelectItem value="city-street">City street</SelectItem>
+                  <SelectItem value="city street">City street</SelectItem>
                   <SelectItem value="racetrack">Racetrack</SelectItem>
                   <SelectItem value="sky">Sky</SelectItem>
-                  <SelectItem value="magical-world">Magical world</SelectItem>
+                  <SelectItem value="magical world">Magical world</SelectItem>
+                  <SelectItem value="desert">Desert</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            {/* Aspect Ratio */}
             <div className="space-y-2">
               <label className="text-lg font-semibold text-gray-900 flex items-center">
                 🔹 Choose Video Aspect Ratio:
@@ -191,14 +166,12 @@ const UploadSection = () => {
                   <SelectValue placeholder="Select aspect ratio..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="square">Square (1:1)</SelectItem>
-                  <SelectItem value="landscape">Landscape (16:9)</SelectItem>
-                  <SelectItem value="portrait">Portrait (9:16)</SelectItem>
+                  <SelectItem value="720:1280">Portrait (9:16)</SelectItem>
+                  <SelectItem value="1280:720">Landscape (16:9)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            {/* Duration */}
             <div className="space-y-2">
               <label className="text-lg font-semibold text-gray-900 flex items-center">
                 🔹 Choose Video Duration:
@@ -214,7 +187,6 @@ const UploadSection = () => {
               </Select>
             </div>
 
-            {/* Generate Button */}
             <Button
               onClick={handleGenerate}
               disabled={loading}
@@ -228,7 +200,6 @@ const UploadSection = () => {
               {loading ? "Generating..." : "Generate Video"}
             </Button>
 
-            {/* Video Result */}
             {videoUrl && (
               <div className="mt-8 p-4 bg-gray-100 rounded-lg text-center border-2 border-dashed border-gray-300">
                 <video controls src={videoUrl} className="mx-auto rounded-lg mb-4" />

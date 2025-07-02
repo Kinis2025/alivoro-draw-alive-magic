@@ -14,13 +14,13 @@ const HowItWorks = () => {
     {
       icon: Play,
       title: "Choose the Animation",
-      description: "Select what's in the drawing – a car, animal, or fantasy creature – and where it comes to life.",
+      description: "Select what your drawing does – runs, flies, drives – and the environment it comes to life in.",
       color: "from-pink-500 to-pink-600"
     },
     {
       icon: Video,
       title: "Generate the Video",
-      description: "Alivoro's AI brings the drawing to life as a realistic or cartoon video, ready to watch and share.",
+      description: "Alivoro's AI brings the drawing to life as a realistic video, ready to watch and share.",
       color: "from-blue-500 to-blue-600"
     },
     {
@@ -37,7 +37,6 @@ const HowItWorks = () => {
         <div className="text-center mb-16">
           <div className="flex items-center justify-center space-x-2 mb-4">
             <span className="text-3xl">🎨</span>
-            <span className="text-3xl">✨</span>
           </div>
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
             How Alivoro Works
@@ -58,7 +57,7 @@ const HowItWorks = () => {
                   {index + 1}
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                  ✅ {step.title}
+                  {step.title}
                 </h3>
                 <p className="text-gray-600 leading-relaxed">
                   {step.description}
