@@ -5,6 +5,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import Login from "./components/Login";
+import UploadSection from "./components/UploadSection";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -15,8 +18,23 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
+          {/* Landing page */}
           <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+
+          {/* Login page */}
+          <Route path="/login" element={<Login />} />
+
+          {/* Protected generate video page */}
+          <Route
+            path="/generate"
+            element={
+              <ProtectedRoute>
+                <UploadSection />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Catch-all not found */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
