@@ -72,7 +72,6 @@ const UploadSection = () => {
         <div className="text-center mb-12">
           <div className="flex items-center justify-center space-x-2 mb-4">
             <span className="text-3xl">📸</span>
-            <span className="text-3xl">🖼️</span>
           </div>
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
             Upload Your Drawing and Generate Video
