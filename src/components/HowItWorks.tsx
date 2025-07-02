@@ -58,7 +58,7 @@ const HowItWorks = () => {
                   {index + 1}
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                  ✅ {step.title}
+                  {step.title}
                 </h3>
                 <p className="text-gray-600 leading-relaxed">
                   {step.description}
