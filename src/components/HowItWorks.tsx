@@ -37,7 +37,6 @@ const HowItWorks = () => {
         <div className="text-center mb-16">
           <div className="flex items-center justify-center space-x-2 mb-4">
             <span className="text-3xl">🎨</span>
-            <span className="text-3xl">✨</span>
           </div>
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
             How Alivoro Works
