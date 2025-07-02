@@ -1,6 +1,4 @@
-
 import React from 'react';
-import { Button } from '@/components/ui/button';
 import { Sparkles, Heart } from 'lucide-react';
 
 const Hero = () => {
@@ -14,30 +12,30 @@ const Hero = () => {
             <span className="text-sm font-medium">AI-Powered Magic</span>
           </div>
         </div>
-        
+
         <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
           Bring Your Child's
           <span className="bg-gradient-to-r from-yellow-300 to-pink-300 bg-clip-text text-transparent block">
             Drawing to Life
           </span>
         </h1>
-        
+
         <p className="text-xl md:text-2xl mb-8 text-white/90 max-w-3xl mx-auto leading-relaxed">
           Turn imagination into magical moving stories.
         </p>
-        
+
         <p className="text-lg mb-10 text-white/80 max-w-2xl mx-auto">
           Upload your child's drawing and watch it transform into a stunning animated video within minutes.
         </p>
-        
-        <Button 
-          size="lg" 
-          className="bg-white text-purple-600 hover:bg-gray-100 text-lg px-8 py-4 rounded-full font-semibold shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-200"
+
+        <a
+          href="#upload"
+          className="inline-flex items-center bg-white text-purple-600 hover:bg-gray-100 text-lg px-8 py-4 rounded-full font-semibold shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-200"
         >
           <Heart className="w-5 h-5 mr-2" />
           Get Started
-        </Button>
-        
+        </a>
+
         <div className="mt-12 flex justify-center space-x-8 text-sm text-white/70">
           <div className="flex items-center">
             <span className="w-2 h-2 bg-green-400 rounded-full mr-2"></span>
@@ -49,11 +47,11 @@ const Hero = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Floating shapes */}
       <div className="absolute top-20 left-10 w-20 h-20 bg-yellow-300/20 rounded-full blur-xl animate-bounce"></div>
       <div className="absolute bottom-20 right-10 w-32 h-32 bg-pink-300/20 rounded-full blur-xl animate-pulse"></div>
-      <div className="absolute top-40 right-20 w-16 h-16 bg-blue-300/20 rounded-full blur-xl animate-bounce" style={{animationDelay: '1s'}}></div>
+      <div className="absolute top-40 right-20 w-16 h-16 bg-blue-300/20 rounded-full blur-xl animate-bounce" style={{ animationDelay: '1s' }}></div>
     </section>
   );
 };
