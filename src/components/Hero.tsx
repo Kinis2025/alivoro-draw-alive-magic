@@ -35,13 +35,13 @@ const Hero = () => {
           className="bg-white text-purple-600 hover:bg-gray-100 text-lg px-8 py-4 rounded-full font-semibold shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-200"
         >
           <Heart className="w-5 h-5 mr-2" />
-          Get Started – It's Free
+          Get Started
         </Button>
         
         <div className="mt-12 flex justify-center space-x-8 text-sm text-white/70">
           <div className="flex items-center">
             <span className="w-2 h-2 bg-green-400 rounded-full mr-2"></span>
-            No credit card required
+            Easy creation
           </div>
           <div className="flex items-center">
             <span className="w-2 h-2 bg-green-400 rounded-full mr-2"></span>
