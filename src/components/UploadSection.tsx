@@ -46,7 +46,7 @@ const UploadSection = () => {
       });
 
       if (!response.ok) {
-        throw new Error(Server error: ${response.statusText});
+       throw new Error(`Server error: ${response.statusText}`);
       }
 
       const data = await response.json();
