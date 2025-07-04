@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@/firebaseConfig";
 import Hero from "../components/Hero";
@@ -7,27 +7,27 @@ import KeyBenefits from "../components/KeyBenefits";
 import UploadSection from "../components/UploadSection";
 import Testimonials from "../components/Testimonials";
 import Footer from "../components/Footer";
+import LoginModal from "../components/LoginModal";
 
 const Index = () => {
   const [user, loading] = useAuthState(auth);
+  const [loginOpen, setLoginOpen] = useState(false);
 
+  // Kad lietotājs ielogojas, automātiski scroll uz Upload sekciju
   useEffect(() => {
-    if (window.location.hash === "#upload") {
-      const scrollToUpload = () => {
-        const element = document.getElementById("upload");
-        if (element) {
-          element.scrollIntoView({ behavior: "smooth" });
-        }
-      };
-
-      // Mazs timeout, lai pārliecinātos, ka UploadSection ir renderēts
-      setTimeout(scrollToUpload, 500);
+    if (user) {
+      const uploadSection = document.getElementById("upload");
+      if (uploadSection) {
+        uploadSection.scrollIntoView({ behavior: "smooth" });
+      }
     }
-  }, [user]); // <- triggerējas, kad lietotāja state mainās
+  }, [user]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
-      <Hero />
+      <Hero onLoginClick={() => setLoginOpen(true)} />
+      <LoginModal open={loginOpen} onOpenChange={setLoginOpen} />
+
       <HowItWorks />
       <KeyBenefits />
 
