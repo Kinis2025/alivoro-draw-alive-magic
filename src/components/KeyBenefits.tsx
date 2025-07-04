@@ -1,9 +1,12 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Sparkles, Gift, Zap, Clock } from 'lucide-react';
+import { useAuthState } from "react-firebase-hooks/auth";
+import { auth } from "@/firebaseConfig";
 
-const KeyBenefits = () => {
+const KeyBenefits = ({ onLoginClick }: { onLoginClick: () => void }) => {
+  const [user] = useAuthState(auth);
+
   const benefits = [
     {
       icon: Sparkles,
@@ -30,6 +33,17 @@ const KeyBenefits = () => {
       color: "from-green-500 to-green-600"
     }
   ];
+
+  const handleTryNowClick = () => {
+    if (user) {
+      const uploadSection = document.getElementById("upload");
+      if (uploadSection) {
+        uploadSection.scrollIntoView({ behavior: "smooth" });
+      }
+    } else {
+      onLoginClick();
+    }
+  };
 
   return (
     <section className="py-20 px-4 bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
@@ -78,7 +92,10 @@ const KeyBenefits = () => {
           <p className="text-xl text-gray-600 mb-6">
             Try the future of creativity today.
           </p>
-          <button className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-4 rounded-full font-semibold text-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
+          <button
+            onClick={handleTryNowClick}
+            className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-4 rounded-full font-semibold text-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+          >
             Try Alivoro Now
           </button>
         </div>
