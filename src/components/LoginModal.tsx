@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { auth } from "@/firebaseConfig";
-import { useNavigate } from "react-router-dom";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -20,7 +19,6 @@ const LoginModal = ({
   const [loading, setLoading] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate(); // ⬅️ React Router navigate
 
   const handleEmailSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -37,7 +35,7 @@ const LoginModal = ({
         await signInWithEmailAndPassword(auth, email, password);
       }
       onOpenChange(false); // aizver modal
-      navigate("/#upload"); // ⬅️ redirect uz upload sadaļu
+      window.location.href = "/#upload"; // ⬅️ redirect uz upload sadaļu
     } catch (err: any) {
       console.error(err);
       setError(err.message || "Authentication failed!");
@@ -55,7 +53,7 @@ const LoginModal = ({
     try {
       await signInWithPopup(auth, provider);
       onOpenChange(false);
-      navigate("/#upload"); // ⬅️ redirect uz upload sadaļu
+      window.location.href = "/#upload"; // ⬅️ redirect uz upload sadaļu
     } catch (err: any) {
       console.error(err);
       setError(err.message || "Google login failed!");
