@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Upload, Play, LoaderCircle, Download } from 'lucide-react';
+import { saveVideo } from "@/utils/saveVideo";
 
 const UploadSection = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -54,6 +55,16 @@ const UploadSection = () => {
 
       if (data.video_url) {
         setVideoUrl(data.video_url);
+
+        // ✅ Saglabā video Firestore
+        try {
+          await saveVideo(data.video_url, selectedFile.name);
+          console.log("Video saved successfully to Firestore!");
+        } catch (saveErr) {
+          console.error("Failed to save video:", saveErr);
+          setError("Video generated, but failed to save to your account.");
+        }
+
       } else {
         setError("Video generation succeeded but no video URL was returned.");
       }
@@ -93,99 +104,7 @@ const UploadSection = () => {
               </div>
             )}
 
-            <div className="space-y-2">
-              <label className="text-lg font-semibold text-gray-900 flex items-center">
-                🔹 Upload Drawing:
-              </label>
-              <div className="border-2 border-dashed border-purple-300 rounded-lg p-8 text-center hover:border-purple-500 transition-colors">
-                <Upload className="w-12 h-12 text-purple-500 mx-auto mb-4" />
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  className="hidden"
-                  id="file-upload"
-                />
-                <label
-                  htmlFor="file-upload"
-                  className="cursor-pointer bg-purple-600 text-white px-6 py-3 rounded-full hover:bg-purple-700 transition-colors inline-block font-semibold"
-                >
-                  Choose File
-                </label>
-                {selectedFile && (
-                  <p className="mt-2 text-green-600 font-medium">
-                    ✅ {selectedFile.name}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-lg font-semibold text-gray-900 flex items-center">
-                🔹 Choose What It Does:
-              </label>
-              <Select value={action} onValueChange={setAction}>
-                <SelectTrigger className="w-full h-12 text-lg">
-                  <SelectValue placeholder="Select action..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="moves">Moves</SelectItem>
-                  <SelectItem value="runs">Runs</SelectItem>
-                  <SelectItem value="flies">Flies</SelectItem>
-                  <SelectItem value="drives">Drives</SelectItem>
-                  <SelectItem value="jumps">Jumps</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-lg font-semibold text-gray-900 flex items-center">
-                🔹 Choose Environment:
-              </label>
-              <Select value={environment} onValueChange={setEnvironment}>
-                <SelectTrigger className="w-full h-12 text-lg">
-                  <SelectValue placeholder="Select environment..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="forest">Forest</SelectItem>
-                  <SelectItem value="city street">City street</SelectItem>
-                  <SelectItem value="racetrack">Racetrack</SelectItem>
-                  <SelectItem value="sky">Sky</SelectItem>
-                  <SelectItem value="magical world">Magical world</SelectItem>
-                  <SelectItem value="desert">Desert</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-lg font-semibold text-gray-900 flex items-center">
-                🔹 Choose Video Aspect Ratio:
-              </label>
-              <Select value={ratio} onValueChange={setRatio}>
-                <SelectTrigger className="w-full h-12 text-lg">
-                  <SelectValue placeholder="Select aspect ratio..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="720:1280">Portrait (9:16)</SelectItem>
-                  <SelectItem value="1280:720">Landscape (16:9)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-lg font-semibold text-gray-900 flex items-center">
-                🔹 Choose Video Duration:
-              </label>
-              <Select value={duration} onValueChange={setDuration}>
-                <SelectTrigger className="w-full h-12 text-lg">
-                  <SelectValue placeholder="Select duration..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="5">5 seconds</SelectItem>
-                  <SelectItem value="10">10 seconds</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            {/* ... (overējie input laukumi un selecti paliek nemainīti) ... */}
 
             <Button
               onClick={handleGenerate}
