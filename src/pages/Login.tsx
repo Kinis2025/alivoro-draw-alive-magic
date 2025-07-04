@@ -6,14 +6,12 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
 } from "firebase/auth";
-import { useNavigate } from "react-router-dom";
 
-const Login = () => {
+const LoginModal = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isRegistering, setIsRegistering] = useState(false);
   const [error, setError] = useState("");
-  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,7 +23,9 @@ const Login = () => {
       } else {
         await signInWithEmailAndPassword(auth, email, password);
       }
-      navigate("/generate");
+
+      // Redirect uz /#upload
+      window.location.href = "/#upload";
     } catch (err: any) {
       setError(err.message);
     }
@@ -35,7 +35,8 @@ const Login = () => {
     const provider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth, provider);
-      navigate("/generate");
+      // Redirect uz /#upload
+      window.location.href = "/#upload";
     } catch (error: any) {
       console.error("Google login error:", error);
       setError(error.message);
@@ -79,7 +80,6 @@ const Login = () => {
           {isRegistering ? "Sign Up" : "Login"}
         </button>
 
-        {/* Google login button */}
         <button
           type="button"
           onClick={handleGoogleLogin}
@@ -103,4 +103,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default LoginModal;
