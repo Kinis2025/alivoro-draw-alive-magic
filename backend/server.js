@@ -4,14 +4,22 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import fetch from 'node-fetch';
 import sharp from 'sharp';
+import Stripe from 'stripe';
 
 dotenv.config();
+
 const app = express();
 const port = process.env.PORT || 10000;
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 app.use(cors());
+app.use(express.json()); // nepieciešams Stripe endpointam
+
 const upload = multer({ storage: multer.memoryStorage() });
 
+/**
+ * Poll Runway task status until completion
+ */
 async function pollTaskStatus(taskId, apiKey) {
   const maxRetries = 60;
   const intervalMs = 3000;
@@ -41,6 +49,9 @@ async function pollTaskStatus(taskId, apiKey) {
   throw new Error('Task polling timed out');
 }
 
+/**
+ * Endpoint: Generate video (Runway)
+ */
 app.post('/api/generate', upload.single('image'), async (req, res) => {
   try {
     const { action, environment, duration, ratio } = req.body;
@@ -63,7 +74,6 @@ app.post('/api/generate', upload.single('image'), async (req, res) => {
 
     const { width, height } = validRatios[ratio];
 
-    // Universālais promts bērnu zīmējumiem ar reālistisku transformāciju
     const promptText = `A realistic version of the subject in the input drawing, preserving its unique shape and form. The subject ${action} in the ${environment}. Cinematic, photorealistic, vibrant lighting, smooth animation.`;
     console.log("📝 Prompt text generated:", promptText);
 
@@ -113,9 +123,7 @@ app.post('/api/generate', upload.single('image'), async (req, res) => {
 
     console.log('✅ Task completed:', taskResult);
 
-    // Send back the first video URL from output array
     const videoUrl = Array.isArray(taskResult.output) ? taskResult.output[0] : null;
-
     res.json({ video_url: videoUrl });
 
   } catch (err) {
@@ -124,6 +132,41 @@ app.post('/api/generate', upload.single('image'), async (req, res) => {
   }
 });
 
+/**
+ * Endpoint: Stripe checkout session
+ */
+app.post('/api/create-checkout-session', async (req, res) => {
+  try {
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      mode: 'payment',
+      line_items: [
+        {
+          price_data: {
+            currency: 'eur',
+            product_data: {
+              name: 'Video Generation',
+              description: 'Generate an AI video from your drawing',
+            },
+            unit_amount: 500, // cena centos (€5.00)
+          },
+          quantity: 1,
+        },
+      ],
+      success_url: 'https://YOUR_FRONTEND_DOMAIN/success',
+      cancel_url: 'https://YOUR_FRONTEND_DOMAIN/cancel',
+    });
+
+    res.json({ url: session.url });
+  } catch (err) {
+    console.error('❌ Stripe checkout error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * Start server
+ */
 app.listen(port, () => {
   console.log(`🚀 Server running on port ${port}`);
 });
