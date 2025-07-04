@@ -29,7 +29,9 @@ const Index = () => {
       <LoginModal open={loginOpen} onOpenChange={setLoginOpen} />
 
       <HowItWorks />
-      <KeyBenefits />
+      
+      {/* ✅ Padod onLoginClick prop šeit */}
+      <KeyBenefits onLoginClick={() => setLoginOpen(true)} />
 
       {loading ? (
         <div className="text-center my-8">Loading...</div>
