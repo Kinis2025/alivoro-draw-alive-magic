@@ -1,30 +1,41 @@
-import React, { useState, useEffect } from "react";
-import { getAuth, signOut, onAuthStateChanged, User } from "firebase/auth";
+import React from "react";
+import { getAuth, signOut } from "firebase/auth";
 import { Sparkles, Heart, LogOut } from "lucide-react";
-import LoginModal from "@/components/LoginModal";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { auth } from "@/firebaseConfig";
 
-const Hero = () => {
-  const [loginOpen, setLoginOpen] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
-
-  const auth = getAuth();
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-    });
-
-    return () => unsubscribe(); // cleanup listener on unmount
-  }, [auth]);
+const Hero = ({ onLoginClick }: { onLoginClick: () => void }) => {
+  const [user] = useAuthState(auth);
 
   const handleLogout = () => {
-    signOut(auth)
+    const authInstance = getAuth();
+    signOut(authInstance)
       .then(() => {
         console.log("Logged out successfully");
       })
       .catch((error) => {
         console.error("Logout error:", error);
       });
+  };
+
+  const handleGetStartedClick = () => {
+    if (user) {
+      // Ja lietotājs ielogojies, scroll uz upload sekciju
+      const uploadSection = document.getElementById("upload");
+      if (uploadSection) {
+        uploadSection.scrollIntoView({ behavior: "smooth" });
+      }
+    } else {
+      // Ja nav ielogojies, atver login modal
+      onLoginClick();
+      // Scroll uz upload sekciju
+      setTimeout(() => {
+        const uploadSection = document.getElementById("upload");
+        if (uploadSection) {
+          uploadSection.scrollIntoView({ behavior: "smooth" });
+        }
+      }, 500); // neliels delay, lai modal atvērtos pirms scroll
+    }
   };
 
   return (
@@ -55,14 +66,14 @@ const Hero = () => {
 
         {/* Get Started button */}
         <button
-          onClick={() => setLoginOpen(true)}
+          onClick={handleGetStartedClick}
           className="inline-flex items-center bg-white text-purple-600 hover:bg-gray-100 text-lg px-8 py-4 rounded-full font-semibold shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-200"
         >
           <Heart className="w-5 h-5 mr-2" />
           Get Started
         </button>
 
-        {/* Logout button - only visible if user is logged in */}
+        {/* Logout button */}
         {user && (
           <div className="mt-4">
             <button
@@ -94,9 +105,6 @@ const Hero = () => {
         className="absolute top-40 right-20 w-16 h-16 bg-blue-300/20 rounded-full blur-xl animate-bounce"
         style={{ animationDelay: "1s" }}
       ></div>
-
-      {/* Login modal */}
-      <LoginModal open={loginOpen} onOpenChange={setLoginOpen} />
     </section>
   );
 };
