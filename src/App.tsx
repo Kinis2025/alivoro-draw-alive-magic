@@ -9,7 +9,8 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Generate from "./pages/Generate";
-import DataDeletion from "./pages/DataDeletion"; // 👈 importē DataDeletion lapu
+import DataDeletion from "./pages/DataDeletion";
+import Dashboard from "./pages/Dashboard"; // 👈 importē Dashboard lapu
 import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -23,7 +24,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/data-deletion" element={<DataDeletion />} /> {/* 👈 pievienots DataDeletion route */}
+          <Route path="/data-deletion" element={<DataDeletion />} />
 
           {/* Protected generate route */}
           <Route
@@ -31,6 +32,16 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <Generate />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Protected dashboard route */}
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
               </ProtectedRoute>
             }
           />
