@@ -1,6 +1,11 @@
 import React, { useState } from "react";
 import { auth } from "@/firebaseConfig";
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithPopup,
+} from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 
 const Login = () => {
@@ -26,10 +31,26 @@ const Login = () => {
     }
   };
 
+  const handleGoogleLogin = async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+      await signInWithPopup(auth, provider);
+      navigate("/generate");
+    } catch (error: any) {
+      console.error("Google login error:", error);
+      setError(error.message);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-md w-full max-w-md space-y-4">
-        <h2 className="text-2xl font-bold text-center">{isRegistering ? "Sign Up" : "Login"}</h2>
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white p-8 rounded-lg shadow-md w-full max-w-md space-y-4"
+      >
+        <h2 className="text-2xl font-bold text-center">
+          {isRegistering ? "Sign Up" : "Login"}
+        </h2>
 
         {error && <p className="text-red-500">{error}</p>}
 
@@ -51,8 +72,20 @@ const Login = () => {
           required
         />
 
-        <button type="submit" className="w-full bg-purple-600 text-white py-2 rounded hover:bg-purple-700">
+        <button
+          type="submit"
+          className="w-full bg-purple-600 text-white py-2 rounded hover:bg-purple-700"
+        >
           {isRegistering ? "Sign Up" : "Login"}
+        </button>
+
+        {/* Google login button */}
+        <button
+          type="button"
+          onClick={handleGoogleLogin}
+          className="w-full flex items-center justify-center bg-red-600 hover:bg-red-700 text-white py-2 rounded"
+        >
+          Continue with Google
         </button>
 
         <p className="text-center">
