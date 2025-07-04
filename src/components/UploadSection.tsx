@@ -4,6 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Upload, Play, LoaderCircle, Download } from 'lucide-react';
 
+import { storage } from "@/firebaseConfig";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { v4 as uuidv4 } from "uuid";
+
 const UploadSection = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [action, setAction] = useState('');
@@ -30,23 +34,34 @@ const UploadSection = () => {
       return;
     }
 
-    const formData = new FormData();
-    formData.append("image", selectedFile);
-    formData.append("action", action);
-    formData.append("environment", environment);
-    formData.append("ratio", ratio);
-    formData.append("duration", duration);
-
     try {
       setLoading(true);
 
+      // ✅ 1. Upload image to Firebase Storage
+      const uniqueFileName = `${uuidv4()}_${selectedFile.name}`;
+      const storageRef = ref(storage, `uploads/${uniqueFileName}`);
+
+      await uploadBytes(storageRef, selectedFile);
+      const downloadURL = await getDownloadURL(storageRef);
+      console.log("Uploaded to Firebase Storage. Download URL:", downloadURL);
+
+      // ✅ 2. Send downloadURL + form data to your backend API
+      const payload = {
+        imageUrl: downloadURL,
+        action,
+        environment,
+        ratio,
+        duration,
+      };
+
       const response = await fetch("https://alivoro-server.onrender.com/api/generate", {
         method: "POST",
-        body: formData,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
-       throw new Error(`Server error: ${response.statusText}`);
+        throw new Error(`Server error: ${response.statusText}`);
       }
 
       const data = await response.json();
@@ -120,6 +135,7 @@ const UploadSection = () => {
               </div>
             </div>
 
+            {/* Action Select */}
             <div className="space-y-2">
               <label className="text-lg font-semibold text-gray-900 flex items-center">
                 🔹 Choose What It Does:
@@ -138,6 +154,7 @@ const UploadSection = () => {
               </Select>
             </div>
 
+            {/* Environment Select */}
             <div className="space-y-2">
               <label className="text-lg font-semibold text-gray-900 flex items-center">
                 🔹 Choose Environment:
@@ -157,6 +174,7 @@ const UploadSection = () => {
               </Select>
             </div>
 
+            {/* Ratio Select */}
             <div className="space-y-2">
               <label className="text-lg font-semibold text-gray-900 flex items-center">
                 🔹 Choose Video Aspect Ratio:
@@ -172,6 +190,7 @@ const UploadSection = () => {
               </Select>
             </div>
 
+            {/* Duration Select */}
             <div className="space-y-2">
               <label className="text-lg font-semibold text-gray-900 flex items-center">
                 🔹 Choose Video Duration:
@@ -187,6 +206,7 @@ const UploadSection = () => {
               </Select>
             </div>
 
+            {/* Generate Button */}
             <Button
               onClick={handleGenerate}
               disabled={loading}
@@ -200,6 +220,7 @@ const UploadSection = () => {
               {loading ? "Generating..." : "Generate Video"}
             </Button>
 
+            {/* Generated Video */}
             {videoUrl && (
               <div className="mt-8 p-4 bg-gray-100 rounded-lg text-center border-2 border-dashed border-gray-300">
                 <video controls src={videoUrl} className="mx-auto rounded-lg mb-4" />
