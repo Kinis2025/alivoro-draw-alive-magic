@@ -10,8 +10,12 @@ import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Generate from "./pages/Generate";
 import DataDeletion from "./pages/DataDeletion";
-import Dashboard from "./pages/Dashboard"; // 👈 importē Dashboard lapu
+import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
+
+// ✅ Importē stripe success un cancel lapas
+import Success from "./pages/Success";
+import CheckoutCancel from "./pages/CheckoutCancel";
 
 const queryClient = new QueryClient();
 
@@ -26,7 +30,13 @@ const App = () => (
           <Route path="/login" element={<Login />} />
           <Route path="/data-deletion" element={<DataDeletion />} />
 
-          {/* Protected generate route */}
+          {/* ✅ Stripe checkout success route */}
+          <Route path="/checkout-success" element={<Success />} />
+
+          {/* ✅ Stripe checkout cancel route */}
+          <Route path="/checkout-cancel" element={<CheckoutCancel />} />
+
+          {/* ✅ Protected generate route */}
           <Route
             path="/generate"
             element={
@@ -36,7 +46,7 @@ const App = () => (
             }
           />
 
-          {/* Protected dashboard route */}
+          {/* ✅ Protected dashboard route */}
           <Route
             path="/dashboard"
             element={
@@ -46,7 +56,7 @@ const App = () => (
             }
           />
 
-          {/* Catch-all route */}
+          {/* ✅ Catch-all route */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
