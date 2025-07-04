@@ -1,9 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import { getAuth, signOut } from "firebase/auth";
 import { Sparkles, Heart, LogOut } from "lucide-react";
 import { Link } from "react-router-dom";
+import LoginModal from "@/components/LoginModal";
 
 const Hero = () => {
+  const [loginOpen, setLoginOpen] = useState(false);
+
   const handleLogout = () => {
     const auth = getAuth();
     signOut(auth)
@@ -42,13 +45,13 @@ const Hero = () => {
         </p>
 
         {/* Get Started button */}
-        <a
-          href="#upload"
+        <button
+          onClick={() => setLoginOpen(true)}
           className="inline-flex items-center bg-white text-purple-600 hover:bg-gray-100 text-lg px-8 py-4 rounded-full font-semibold shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-200"
         >
           <Heart className="w-5 h-5 mr-2" />
           Get Started
-        </a>
+        </button>
 
         {/* Login button */}
         <div className="mt-4">
@@ -90,6 +93,9 @@ const Hero = () => {
         className="absolute top-40 right-20 w-16 h-16 bg-blue-300/20 rounded-full blur-xl animate-bounce"
         style={{ animationDelay: "1s" }}
       ></div>
+
+      {/* Login modal */}
+      <LoginModal open={loginOpen} onOpenChange={setLoginOpen} />
     </section>
   );
 };
