@@ -1,96 +1,86 @@
 import React, { useEffect, useState } from "react";
 import { auth, db } from "@/firebaseConfig";
+import { signOut, onAuthStateChanged } from "firebase/auth";
 import { collection, query, where, getDocs } from "firebase/firestore";
-import { onAuthStateChanged } from "firebase/auth";
-
-interface Video {
-  id: string;
-  title?: string;
-  url?: string;
-  createdAt?: any;
-}
+import UploadSection from "@/components/UploadSection";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
-  const [videos, setVideos] = useState<Video[]>([]);
+  const [user, setUser] = useState<any>(null);
+  const [videos, setVideos] = useState<any[]>([]);
+  const [credits, setCredits] = useState<number>(0);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        setError("You must be logged in to view your videos.");
-        setLoading(false);
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (!currentUser) {
+        navigate("/login");
         return;
       }
+      setUser(currentUser);
 
-      try {
-        const q = query(
-          collection(db, "videos"),
-          where("userId", "==", user.uid)
-        );
-
-        const querySnapshot = await getDocs(q);
-        const videoList = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        })) as Video[];
-
-        setVideos(videoList);
-      } catch (err) {
-        console.error("Error fetching videos:", err);
-        setError("Failed to load videos. Please try again later.");
-      } finally {
-        setLoading(false);
+      // 🔥 Fetch user credits from Firestore (if you implement credits)
+      const userDoc = await getDocs(query(collection(db, "users"), where("uid", "==", currentUser.uid)));
+      if (!userDoc.empty) {
+        setCredits(userDoc.docs[0].data().credits || 0);
       }
+
+      // 🔥 Fetch user videos
+      const q = query(collection(db, "videos"), where("userId", "==", currentUser.uid));
+      const snapshot = await getDocs(q);
+      const videoList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setVideos(videoList);
+
+      setLoading(false);
     });
 
     return () => unsubscribe();
   }, []);
 
-  if (loading) return <div className="text-center p-8">Loading...</div>;
-  if (error) return <div className="text-center p-8 text-red-500">{error}</div>;
+  const handleLogout = async () => {
+    await signOut(auth);
+    navigate("/login");
+  };
+
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
 
   return (
-    <div className="max-w-4xl mx-auto p-8">
-      <h1 className="text-3xl font-bold mb-6">My Videos</h1>
+    <div className="max-w-5xl mx-auto p-8 space-y-8">
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold">Welcome, {user.email}</h1>
+        <button onClick={handleLogout} className="text-purple-600 underline">Logout</button>
+      </div>
 
-      {videos.length === 0 ? (
-        <p>You have no generated videos yet.</p>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {videos.map((video) => (
-            <div key={video.id} className="border rounded p-4 shadow">
-              {video.url ? (
-                <video src={video.url} controls className="w-full mb-2" />
-              ) : (
-                <p>No video URL available.</p>
-              )}
+      <div className="bg-gray-100 p-4 rounded shadow text-lg">
+        💰 Credits: <span className="font-bold">{credits}</span>
+      </div>
 
-              <p className="text-lg font-semibold">{video.title || "Untitled"}</p>
+      {/* Upload form */}
+      <UploadSection />
 
-              {video.createdAt && video.createdAt.seconds ? (
+      {/* Videos list */}
+      <div>
+        <h2 className="text-2xl font-bold mb-4">My Videos</h2>
+        {videos.length === 0 ? (
+          <p>You have no generated videos yet.</p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {videos.map(video => (
+              <div key={video.id} className="border rounded p-4 shadow">
+                {video.videoUrl ? (
+                  <video src={video.videoUrl} controls className="w-full mb-2" />
+                ) : (
+                  <p>No video URL available.</p>
+                )}
                 <p className="text-sm text-gray-600">
-                  Created at:{" "}
-                  {new Date(video.createdAt.seconds * 1000).toLocaleString()}
+                  Created at: {video.createdAt?.seconds ? new Date(video.createdAt.seconds * 1000).toLocaleString() : "Unknown"}
                 </p>
-              ) : (
-                <p className="text-sm text-gray-600">No creation date.</p>
-              )}
-
-              {video.url && (
-                <a
-                  href={video.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-purple-600 underline"
-                >
-                  Download
-                </a>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
