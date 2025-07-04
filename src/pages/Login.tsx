@@ -4,6 +4,7 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
+  FacebookAuthProvider,
   signInWithPopup,
 } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
@@ -25,7 +26,7 @@ const Login = () => {
       } else {
         await signInWithEmailAndPassword(auth, email, password);
       }
-      navigate("/generate"); // pārsūta uz video ģenerēšanas lapu
+      navigate("/generate");
     } catch (err: any) {
       setError(err.message);
     }
@@ -38,6 +39,17 @@ const Login = () => {
       navigate("/generate");
     } catch (error: any) {
       console.error("Google login error:", error);
+      setError(error.message);
+    }
+  };
+
+  const handleFacebookLogin = async () => {
+    const provider = new FacebookAuthProvider();
+    try {
+      await signInWithPopup(auth, provider);
+      navigate("/generate");
+    } catch (error: any) {
+      console.error("Facebook login error:", error);
       setError(error.message);
     }
   };
@@ -86,6 +98,15 @@ const Login = () => {
           className="w-full flex items-center justify-center bg-red-600 hover:bg-red-700 text-white py-2 rounded"
         >
           Continue with Google
+        </button>
+
+        {/* Facebook login button */}
+        <button
+          type="button"
+          onClick={handleFacebookLogin}
+          className="w-full flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white py-2 rounded"
+        >
+          Continue with Facebook
         </button>
 
         <p className="text-center">
