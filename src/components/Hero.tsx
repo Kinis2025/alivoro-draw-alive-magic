@@ -1,14 +1,23 @@
-import React, { useState } from "react";
-import { getAuth, signOut } from "firebase/auth";
+import React, { useState, useEffect } from "react";
+import { getAuth, signOut, onAuthStateChanged, User } from "firebase/auth";
 import { Sparkles, Heart, LogOut } from "lucide-react";
-import { Link } from "react-router-dom";
 import LoginModal from "@/components/LoginModal";
 
 const Hero = () => {
   const [loginOpen, setLoginOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+
+  const auth = getAuth();
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+
+    return () => unsubscribe(); // cleanup listener on unmount
+  }, [auth]);
 
   const handleLogout = () => {
-    const auth = getAuth();
     signOut(auth)
       .then(() => {
         console.log("Logged out successfully");
@@ -53,26 +62,18 @@ const Hero = () => {
           Get Started
         </button>
 
-        {/* Login button */}
-        <div className="mt-4">
-          <Link
-            to="/login"
-            className="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white text-lg px-6 py-3 rounded-full font-semibold shadow-md hover:shadow-xl transform hover:scale-105 transition-all duration-200"
-          >
-            Login
-          </Link>
-        </div>
-
-        {/* Logout button */}
-        <div className="mt-4">
-          <button
-            onClick={handleLogout}
-            className="inline-flex items-center bg-gray-200 hover:bg-gray-300 text-gray-800 text-lg px-6 py-3 rounded-full font-semibold shadow-md hover:shadow-xl transform hover:scale-105 transition-all duration-200"
-          >
-            <LogOut className="w-5 h-5 mr-2" />
-            Logout
-          </button>
-        </div>
+        {/* Logout button - only visible if user is logged in */}
+        {user && (
+          <div className="mt-4">
+            <button
+              onClick={handleLogout}
+              className="inline-flex items-center bg-gray-200 hover:bg-gray-300 text-gray-800 text-lg px-6 py-3 rounded-full font-semibold shadow-md hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+            >
+              <LogOut className="w-5 h-5 mr-2" />
+              Logout
+            </button>
+          </div>
+        )}
 
         <div className="mt-12 flex justify-center space-x-8 text-sm text-white/70">
           <div className="flex items-center">
