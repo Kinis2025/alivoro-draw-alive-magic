@@ -224,14 +224,21 @@ const UploadSection = () => {
             {videoUrl && (
               <div className="mt-8 p-4 bg-gray-100 rounded-lg text-center border-2 border-dashed border-gray-300">
                 <video controls src={videoUrl} className="mx-auto rounded-lg mb-4" />
-                <a
-                  href={videoUrl}
-                  download
-                  className="inline-flex items-center bg-green-600 text-white px-6 py-3 rounded-full hover:bg-green-700 transition-colors font-semibold"
-                >
-                  <Download className="w-5 h-5 mr-2" />
-                  Download Video
-                </a>
+<Button
+  onClick={() => {
+    const link = document.createElement("a");
+    link.href = videoUrl!;
+    link.download = "my-generated-video.mp4";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }}
+  className="inline-flex items-center bg-green-600 text-white px-6 py-3 rounded-full hover:bg-green-700 transition-colors font-semibold"
+>
+  <Download className="w-5 h-5 mr-2" />
+  Download Video
+</Button>
+
               </div>
             )}
 
