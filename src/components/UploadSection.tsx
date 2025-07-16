@@ -142,13 +142,13 @@ const UploadSection = () => {
                 <SelectTrigger className="w-full h-12 text-lg">
                   <SelectValue placeholder="Select environment..." />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="forest">Forest</SelectItem>
-                  <SelectItem value="meadow">Meadow</SelectItem>
-                  <SelectItem value="jungle">Jungle</SelectItem>
-                  <SelectItem value="desert">Desert</SelectItem>
-                  <SelectItem value="village">Village</SelectItem>
-                </SelectContent>
+<SelectContent>
+  <SelectItem value="forest">Forest</SelectItem>
+  <SelectItem value="meadow">Meadow</SelectItem>
+  <SelectItem value="beach">Beach</SelectItem>
+  <SelectItem value="mountain">Mountain</SelectItem>
+  <SelectItem value="road">Road</SelectItem>
+</SelectContent>
               </Select>
             </div>
 
