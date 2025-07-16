@@ -56,27 +56,15 @@ async function pollTaskStatus(taskId, apiKey) {
  */
 app.post('/api/generate', async (req, res) => {
   try {
-    const { imageUrl, action, environment, duration, ratio } = req.body;
+    const { imageUrl, action, environment } = req.body;
 
-    console.log("📝 Received form data:", { action, environment, duration, ratio });
+    const duration = 5;
+    const ratio = "720:1280";
+    const { width, height } = { width: 720, height: 1280 };
 
-    const validRatios = {
-      "1280:720": { width: 1280, height: 720 },
-      "720:1280": { width: 720, height: 1280 },
-      "1104:832": { width: 1104, height: 832 },
-      "832:1104": { width: 832, height: 1104 },
-      "960:960": { width: 960, height: 960 },
-      "1584:672": { width: 1584, height: 672 }
-    };
+    console.log("📝 Received form data:", { action, environment });
 
-    if (!validRatios[ratio]) {
-      console.error("❌ Invalid ratio:", ratio);
-      return res.status(400).json({ error: 'Invalid ratio selected.' });
-    }
-
-    const { width, height } = validRatios[ratio];
-
-const promptText = `A realistic version of the subject in the input drawing, preserving its unique shape and form. Transform the subject into a 3D object. The subject ${action} in the ${environment}. Cinematic, photorealistic, vibrant lighting, smooth animation.`;
+    const promptText = `A realistic version of the subject in the input drawing, preserving its unique shape and form. Transform the subject into a 3D object. The subject ${action} in the ${environment}. Cinematic, photorealistic, vibrant lighting, smooth animation.`;
     console.log("📝 Prompt text generated:", promptText);
 
     if (!process.env.RUNWAY_API_KEY) {
@@ -90,7 +78,6 @@ const promptText = `A realistic version of the subject in the input drawing, pre
       throw new Error(`Failed to download image from URL: ${imageUrl}`);
     }
 
-    // ✅ Use arrayBuffer (not buffer()) to avoid deprecation warning
     const imageArrayBuffer = await imageResponse.arrayBuffer();
     const imageBuffer = Buffer.from(imageArrayBuffer);
 
@@ -114,7 +101,7 @@ const promptText = `A realistic version of the subject in the input drawing, pre
       body: JSON.stringify({
         model: 'gen4_turbo',
         promptText,
-        duration: parseInt(duration, 10),
+        duration,
         ratio,
         promptImage: dataUri,
         contentModeration: { publicFigureThreshold: 'auto' },
@@ -130,9 +117,7 @@ const promptText = `A realistic version of the subject in the input drawing, pre
 
     console.log('✅ Runway video task created:', data);
 
-    // 🕒 Wait 2 seconds before polling
     await new Promise((r) => setTimeout(r, 2000));
-
     const taskResult = await pollTaskStatus(data.id, process.env.RUNWAY_API_KEY);
 
     console.log('✅ Task completed:', taskResult);
@@ -162,13 +147,13 @@ app.post('/api/create-checkout-session', async (req, res) => {
               name: 'Video Generation',
               description: 'Generate an AI video from your drawing',
             },
-            unit_amount: 500,
+            unit_amount: 200, // €2.00 in cents
           },
           quantity: 1,
         },
       ],
-      success_url: 'https://YOUR_FRONTEND_DOMAIN/success',
-      cancel_url: 'https://YOUR_FRONTEND_DOMAIN/cancel',
+      success_url: 'https://profound-pastelito-9a87a9.netlify.app/success',
+      cancel_url: 'https://profound-pastelito-9a87a9.netlify.app/cancel',
     });
 
     res.json({ url: session.url });
