@@ -61,7 +61,7 @@ const PrivacyPolicy = () => {
 
       <h2 className="mt-6 font-semibold text-lg">10. Contact Us</h2>
       <p>
-        If you have any questions or concerns regarding this Privacy Policy, contact us at: <strong>alivoro.help@gmail.com</strong>
+        If you have any questions or concerns regarding this Privacy Policy, contact us at: <strong>alivorolive@gmail.com</strong>
       </p>
 
       {/* 🔙 Back to Home button */}
