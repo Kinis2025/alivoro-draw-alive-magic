@@ -197,7 +197,7 @@ const UploadSection = () => {
 <Button
   onClick={handleGenerate}
   disabled={loading}
-  className="w-full h-auto min-h-14 px-4 py-3 text-base font-bold bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 transition-all duration-200 transform hover:scale-105 flex flex-col justify-center items-center whitespace-normal leading-snug text-white text-center"
+  className="w-full min-h-14 px-6 py-4 text-base font-bold bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 transition-all duration-200 transform hover:scale-105 flex flex-col justify-center items-center whitespace-normal leading-snug text-white text-center"
 >
   {loading ? (
     <>
@@ -211,6 +211,7 @@ const UploadSection = () => {
     </div>
   )}
 </Button>
+
 
 
             {/* Result */}
