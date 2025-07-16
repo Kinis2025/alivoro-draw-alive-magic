@@ -76,10 +76,8 @@ app.post('/api/generate', async (req, res) => {
 
     const { width, height } = validRatios[ratio];
 
-    const promptText = `The subject moves through the ${environment}. 
-The scene reacts gently with floating particles, light or movement. 
-A smooth tracking camera follows the motion. 
-Colorful, soft lighting, dreamy storybook animation.`;
+const promptText = `A realistic version of the subject in the input drawing, preserving its unique shape and form. The subject moves through the ${environment}. The camera gently tracks the motion. Natural lighting, cinematic animation, vibrant but soft atmosphere.`;
+
 
     console.log("📝 Prompt text generated:", promptText);
 
