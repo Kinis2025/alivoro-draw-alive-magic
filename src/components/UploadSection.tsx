@@ -226,19 +226,14 @@ const UploadSection = () => {
                 <video controls src={videoUrl} className="mx-auto rounded-lg mb-4" />
 <Button
   onClick={() => {
-    const link = document.createElement("a");
-    link.href = videoUrl!;
-    link.download = "my-generated-video.mp4";
-    link.target = "_blank"; // Atver jaunā tabā
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    window.open(videoUrl!, '_blank');
   }}
-  className="inline-flex items-center bg-green-600 text-white px-6 py-3 rounded-full hover:bg-green-700 transition-colors font-semibold"
+  className="inline-flex items-center bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 transition-colors font-semibold"
 >
   <Download className="w-5 h-5 mr-2" />
-  Download Video
+  Open Video in New Tab
 </Button>
+
 
               </div>
             )}
