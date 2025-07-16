@@ -15,7 +15,7 @@ const UploadSection = () => {
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const [action] = useState('moves'); // fixed action
+  const [action] = useState('moves');
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -77,6 +77,25 @@ const UploadSection = () => {
       setError("Failed to generate video. Please try again.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleStripeCheckout = async () => {
+    try {
+      const res = await fetch("https://alivoro-server.onrender.com/api/create-checkout-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        setError("Payment could not be initiated.");
+      }
+    } catch (err) {
+      console.error("Stripe checkout error:", err);
+      setError("Payment error. Try again later.");
     }
   };
 
@@ -142,17 +161,25 @@ const UploadSection = () => {
                 <SelectTrigger className="w-full h-12 text-lg">
                   <SelectValue placeholder="Select environment..." />
                 </SelectTrigger>
-<SelectContent>
-  <SelectItem value="forest">Forest</SelectItem>
-  <SelectItem value="meadow">Meadow</SelectItem>
-  <SelectItem value="beach">Beach</SelectItem>
-  <SelectItem value="mountain">Mountain</SelectItem>
-  <SelectItem value="road">Road</SelectItem>
-</SelectContent>
+                <SelectContent>
+                  <SelectItem value="forest">Forest</SelectItem>
+                  <SelectItem value="meadow">Meadow</SelectItem>
+                  <SelectItem value="beach">Beach</SelectItem>
+                  <SelectItem value="mountain">Mountain</SelectItem>
+                  <SelectItem value="road">Road</SelectItem>
+                </SelectContent>
               </Select>
             </div>
 
-            {/* Generate button */}
+            {/* Stripe Checkout Button */}
+            <Button
+              onClick={handleStripeCheckout}
+              className="w-full h-14 text-xl font-bold bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 transition-all"
+            >
+              💳 Buy Video (2€)
+            </Button>
+
+            {/* Generate Button */}
             <Button
               onClick={handleGenerate}
               disabled={loading}
@@ -171,7 +198,7 @@ const UploadSection = () => {
               )}
             </Button>
 
-            {/* Result */}
+            {/* Video Output */}
             {videoUrl && (
               <div className="mt-8 p-4 bg-gray-100 rounded-lg text-center border-2 border-dashed border-gray-300">
                 <video controls src={videoUrl} className="mx-auto rounded-lg mb-4" />
