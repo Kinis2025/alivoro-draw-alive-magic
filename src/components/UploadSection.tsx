@@ -229,6 +229,7 @@ const UploadSection = () => {
     const link = document.createElement("a");
     link.href = videoUrl!;
     link.download = "my-generated-video.mp4";
+    link.target = "_blank"; // Atver jaunā tabā
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
