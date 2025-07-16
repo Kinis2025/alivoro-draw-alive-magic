@@ -68,19 +68,20 @@ const Success = () => {
               link.click();
               document.body.removeChild(link);
             }}
-            className="bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 transition-colors font-semibold"
+            className="bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 transition-colors font-semibold mb-4"
           >
             ⬇️ Download Video
           </Button>
+
+          {/* ✅ Only show this when video is ready */}
+          <Button
+            onClick={() => (window.location.href = "/")}
+            className="bg-gray-800 text-white px-6 py-3 rounded-full hover:bg-gray-900 transition-colors font-semibold"
+          >
+            🔙 Back to Home
+          </Button>
         </div>
       )}
-
-      <Button
-        onClick={() => (window.location.href = "/")}
-        className="bg-gray-800 text-white px-6 py-3 rounded-full hover:bg-gray-900 transition-colors font-semibold"
-      >
-        🔙 Back to Home
-      </Button>
     </div>
   );
 };
