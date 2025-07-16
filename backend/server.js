@@ -1,5 +1,4 @@
 import express from 'express';
-import multer from 'multer';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import fetch from 'node-fetch';
@@ -13,9 +12,7 @@ const port = process.env.PORT || 10000;
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 app.use(cors());
-app.use(express.json()); // nepieciešams Stripe endpointam
-
-const upload = multer({ storage: multer.memoryStorage() });
+app.use(express.json()); // JSON atbalsts
 
 /**
  * Poll Runway task status until completion
@@ -52,9 +49,9 @@ async function pollTaskStatus(taskId, apiKey) {
 /**
  * Endpoint: Generate video (Runway)
  */
-app.post('/api/generate', upload.single('image'), async (req, res) => {
+app.post('/api/generate', async (req, res) => {
   try {
-    const { action, environment, duration, ratio } = req.body;
+    const { imageUrl, action, environment, duration, ratio } = req.body;
 
     console.log("📝 Received form data:", { action, environment, duration, ratio });
 
@@ -82,8 +79,16 @@ app.post('/api/generate', upload.single('image'), async (req, res) => {
       return res.status(500).json({ error: "Server misconfiguration: Missing API key." });
     }
 
-    // Resize image with Sharp
-    const resizedImageBuffer = await sharp(req.file.buffer)
+    // 🔽 Download image from Firebase URL
+    const imageResponse = await fetch(imageUrl);
+    if (!imageResponse.ok) {
+      throw new Error(`Failed to download image from URL: ${imageUrl}`);
+    }
+
+    const imageBuffer = await imageResponse.buffer();
+
+    // 🔧 Resize using Sharp
+    const resizedImageBuffer = await sharp(imageBuffer)
       .resize({ width, height, fit: 'contain', background: { r: 0, g: 0, b: 0 } })
       .toFormat('jpeg')
       .toBuffer();
@@ -91,7 +96,7 @@ app.post('/api/generate', upload.single('image'), async (req, res) => {
     const base64Image = resizedImageBuffer.toString('base64');
     const dataUri = `data:image/jpeg;base64,${base64Image}`;
 
-    // Call Runway API to start video generation
+    // 🚀 Call Runway API
     const startResponse = await fetch('https://api.dev.runwayml.com/v1/image_to_video', {
       method: 'POST',
       headers: {
@@ -118,7 +123,7 @@ app.post('/api/generate', upload.single('image'), async (req, res) => {
 
     console.log('✅ Runway video task created:', data);
 
-    // Poll for completion
+    // ⏳ Poll for result
     const taskResult = await pollTaskStatus(data.id, process.env.RUNWAY_API_KEY);
 
     console.log('✅ Task completed:', taskResult);
@@ -148,7 +153,7 @@ app.post('/api/create-checkout-session', async (req, res) => {
               name: 'Video Generation',
               description: 'Generate an AI video from your drawing',
             },
-            unit_amount: 500, // cena centos (€5.00)
+            unit_amount: 500, // €5.00
           },
           quantity: 1,
         },
