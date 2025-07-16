@@ -17,6 +17,7 @@ import Success from "./pages/Success";
 import CheckoutCancel from "./pages/CheckoutCancel";
 import Terms from "./pages/Terms";
 import Pricing from "./pages/Pricing";
+import Contact from "./pages/Contact";
 import PrivacyPolicy from "./pages/PrivacyPolicy"; // ✅ Importē Privacy Policy
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
           <Route path="/checkout-success" element={<Success />} />
           <Route path="/checkout-cancel" element={<CheckoutCancel />} />
           <Route path="/terms" element={<Terms />} />
+          <Route path="/contact" element={<Contact />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/privacy" element={<PrivacyPolicy />} /> {/* ✅ Privacy Policy route */}
 
