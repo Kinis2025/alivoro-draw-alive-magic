@@ -194,23 +194,24 @@ const UploadSection = () => {
             </div>
 
             {/* Generate button */}
-<button
+<Button
   onClick={handleGenerate}
   disabled={loading}
-  style={{
-    background: loading ? "#AAA" : "#6b21a8",
-    padding: "1rem",
-    borderRadius: "9999px",
-    color: "white",
-    fontSize: "1.125rem",
-    fontWeight: "bold",
-  }}
+  className="w-full h-14 text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 transition-all duration-200 transform hover:scale-105"
 >
-  {loading ?
-    "🌟 Generating video... Do not close this window!" :
-    "▶️ Generate Video"
-  }
-</button>
+  {loading ? (
+    <span className="flex items-center">
+      <LoaderCircle className="w-6 h-6 mr-2 animate-spin" />
+      Generating video... Do not close this window!
+    </span>
+  ) : (
+    <span className="flex items-center">
+      <Play className="w-6 h-6 mr-2" />
+      Generate Video
+    </span>
+  )}
+</Button>
+
 
 
 
