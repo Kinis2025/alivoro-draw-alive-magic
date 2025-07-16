@@ -76,7 +76,8 @@ app.post('/api/generate', async (req, res) => {
 
     const { width, height } = validRatios[ratio];
 
-const promptText = `Transform the subject from the input drawing into a realistic 3D character, keeping its original shape and proportions. The subject moves naturally in the ${environment}. Cinematic lighting, photorealistic style, smooth motion, dynamic animation.`;
+const promptText = `A lifelike 3D version of the subject from the input drawing, preserving its unique shape, proportions, and visual style. The subject moves naturally in the ${environment}. Cinematic lighting, soft shadows, stylized realism, smooth animation.`;
+
 
 
 
