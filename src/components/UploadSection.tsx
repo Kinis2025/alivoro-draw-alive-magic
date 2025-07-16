@@ -14,6 +14,7 @@ const UploadSection = () => {
   const [loading, setLoading] = useState(false);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [agreeToTerms, setAgreeToTerms] = useState(false);
 
   const [action] = useState('moves');
 
@@ -140,16 +141,51 @@ const UploadSection = () => {
               </Select>
             </div>
 
+            {/* Terms agreement checkbox */}
+            <div className="flex items-start space-x-3">
+              <input
+                type="checkbox"
+                id="terms"
+                checked={agreeToTerms}
+                onChange={(e) => setAgreeToTerms(e.target.checked)}
+                className="mt-1 w-5 h-5"
+              />
+              <label htmlFor="terms" className="text-sm text-gray-700 leading-snug">
+                I agree to the{" "}
+                <a
+                  href="/terms"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-purple-600 underline hover:text-purple-800"
+                >
+                  Terms of Service
+                </a>{" "}
+                and{" "}
+                <a
+                  href="/privacy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-purple-600 underline hover:text-purple-800"
+                >
+                  Privacy Policy
+                </a>
+              </label>
+            </div>
+
             {/* Stripe Checkout Button */}
             <Button
               onClick={handleStripeCheckout}
-              className="w-full h-14 text-xl font-bold bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 transition-all"
-              disabled={loading}
+              disabled={!agreeToTerms || loading}
+              className={`w-full h-14 text-xl font-bold transition-all ${
+                agreeToTerms
+                  ? "bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600"
+                  : "bg-gray-300 cursor-not-allowed"
+              }`}
             >
               💳 Buy Video (2€)
             </Button>
 
-            {/* Video Output after direct generation (for testing only) */}
+            {/* Optional Video Preview after generation */}
             {videoUrl && (
               <div className="mt-8 p-4 bg-gray-100 rounded-lg text-center border-2 border-dashed border-gray-300">
                 <video controls src={videoUrl} className="mx-auto rounded-lg mb-4" />
