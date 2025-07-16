@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 
 const Success = () => {
-  const [status, setStatus] = useState("Generating your video...");
+  const [status, setStatus] = useState("⏳ PLEASE WAIT WHILE YOUR VIDEO IS BEING GENERATED. DO NOT CLOSE THIS PAGE!");
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -26,7 +26,7 @@ const Success = () => {
         console.log("Generated video:", data);
 
         if (data.video_url) {
-          setStatus("✅ Video generated! You can download it below.");
+          setStatus("✅ VIDEO GENERATED SUCCESSFULLY! YOU CAN DOWNLOAD IT BELOW.");
           setVideoUrl(data.video_url);
 
           // 🧹 Clear localStorage
@@ -36,11 +36,11 @@ const Success = () => {
           localStorage.removeItem("duration");
           localStorage.removeItem("ratio");
         } else {
-          setStatus("❌ Video generation failed. Please try again.");
+          setStatus("❌ VIDEO GENERATION FAILED. PLEASE TRY AGAIN.");
         }
       } catch (error) {
         console.error("Error generating video after payment:", error);
-        setStatus("❌ Error generating video. Please contact support.");
+        setStatus("❌ ERROR GENERATING VIDEO. PLEASE CONTACT SUPPORT.");
       }
     };
 
@@ -49,11 +49,14 @@ const Success = () => {
 
   return (
     <div className="text-center py-20 px-4">
-      <h1 className="text-4xl font-bold mb-4">🎉 Payment Successful!</h1>
-      <p className="text-lg mb-6">{status}</p>
+      <h1 className="text-4xl font-bold mb-6">🎉 Payment Successful!</h1>
+
+      <p className="text-xl font-bold text-red-600 uppercase mb-8">
+        {status}
+      </p>
 
       {videoUrl && (
-        <div className="mb-6">
+        <div className="mb-8">
           <video controls src={videoUrl} className="mx-auto rounded-lg mb-4 max-w-full" />
           <Button
             onClick={() => {
