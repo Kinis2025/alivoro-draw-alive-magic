@@ -5,7 +5,7 @@ import { Heart } from "lucide-react";
 const Footer = () => {
   const links = [
     { title: "About", to: "#about" },
-    { title: "Pricing", to: "#pricing" },
+    { title: "Pricing", to: "/pricing" },
     { title: "Contact", to: "#contact" },
     { title: "Terms of Service", to: "/terms" },
     { title: "Privacy Policy", to: "/privacy" },
