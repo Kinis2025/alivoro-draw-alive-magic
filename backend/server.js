@@ -152,8 +152,8 @@ app.post('/api/create-checkout-session', async (req, res) => {
           quantity: 1,
         },
       ],
-      success_url: 'https://profound-pastelito-9a87a9.netlify.app/success',
-      cancel_url: 'https://profound-pastelito-9a87a9.netlify.app/cancel',
+      success_url: 'https://profound-pastelito-9a87a9.netlify.app/checkout-success',
+      cancel_url: 'https://profound-pastelito-9a87a9.netlify.app/checkout-cancel',
     });
 
     res.json({ url: session.url });
