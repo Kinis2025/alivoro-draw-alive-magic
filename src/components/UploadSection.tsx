@@ -24,17 +24,14 @@ const UploadSection = () => {
     }
   };
 
-  const handleGenerate = async () => {
-    setError(null);
-    setVideoUrl(null);
-
+  const handleStripeCheckout = async () => {
     if (!selectedFile || !environment) {
-      setError('Please upload a drawing and choose an environment before generating!');
+      setError("Please upload a drawing and choose an environment before payment.");
       return;
     }
 
-    const duration = '5';
-    const ratio = '720:1280';
+    const duration = "5";
+    const ratio = "720:1280";
 
     try {
       setLoading(true);
@@ -43,45 +40,15 @@ const UploadSection = () => {
       const storageRef = ref(storage, `uploads/${uniqueFileName}`);
       await uploadBytes(storageRef, selectedFile);
       const downloadURL = await getDownloadURL(storageRef);
-      console.log("Uploaded to Firebase Storage. Download URL:", downloadURL);
+      console.log("Uploaded to Firebase. Download URL:", downloadURL);
 
-      const payload = {
-        imageUrl: downloadURL,
-        action,
-        environment,
-        ratio,
-        duration,
-      };
+      // ✅ Save data for use in /checkout-success page
+      localStorage.setItem("uploadedImageUrl", downloadURL);
+      localStorage.setItem("action", action);
+      localStorage.setItem("environment", environment);
+      localStorage.setItem("duration", duration);
+      localStorage.setItem("ratio", ratio);
 
-      const response = await fetch("https://alivoro-server.onrender.com/api/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Server error: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      console.log("Video generation result:", data);
-
-      if (data.video_url) {
-        setVideoUrl(data.video_url);
-      } else {
-        setError("Video generation succeeded but no video URL was returned.");
-      }
-
-    } catch (error) {
-      console.error("Error generating video:", error);
-      setError("Failed to generate video. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleStripeCheckout = async () => {
-    try {
       const res = await fetch("https://alivoro-server.onrender.com/api/create-checkout-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -96,6 +63,8 @@ const UploadSection = () => {
     } catch (err) {
       console.error("Stripe checkout error:", err);
       setError("Payment error. Try again later.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -175,30 +144,12 @@ const UploadSection = () => {
             <Button
               onClick={handleStripeCheckout}
               className="w-full h-14 text-xl font-bold bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 transition-all"
+              disabled={loading}
             >
               💳 Buy Video (2€)
             </Button>
 
-            {/* Generate Button */}
-            <Button
-              onClick={handleGenerate}
-              disabled={loading}
-              className="w-full h-14 text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 transition-all duration-200 transform hover:scale-105"
-            >
-              {loading ? (
-                <span className="flex items-center">
-                  <LoaderCircle className="w-6 h-6 mr-2 animate-spin" />
-                  Generating video... Do not close this window!
-                </span>
-              ) : (
-                <span className="flex items-center">
-                  <Play className="w-6 h-6 mr-2" />
-                  Generate Video
-                </span>
-              )}
-            </Button>
-
-            {/* Video Output */}
+            {/* Video Output after direct generation (for testing only) */}
             {videoUrl && (
               <div className="mt-8 p-4 bg-gray-100 rounded-lg text-center border-2 border-dashed border-gray-300">
                 <video controls src={videoUrl} className="mx-auto rounded-lg mb-4" />
