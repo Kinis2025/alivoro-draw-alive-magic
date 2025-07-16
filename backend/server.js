@@ -76,10 +76,7 @@ app.post('/api/generate', async (req, res) => {
 
     const { width, height } = validRatios[ratio];
 
-const promptText = `A lifelike 3D version of the subject from the input drawing, preserving its unique shape, proportions, and visual style. The subject moves naturally in the ${environment}. Cinematic lighting, soft shadows, stylized realism, smooth animation.`;
-
-
-
+const promptText = `A realistic version of the subject in the input drawing, preserving its unique shape and form. Transform the subject into a 3D object. The subject ${action} in the ${environment}. Cinematic, photorealistic, vibrant lighting, smooth animation.`;
 
     console.log("📝 Prompt text generated:", promptText);
 
