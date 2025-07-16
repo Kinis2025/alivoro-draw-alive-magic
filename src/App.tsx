@@ -15,9 +15,8 @@ import ProtectedRoute from "./components/ProtectedRoute";
 
 import Success from "./pages/Success";
 import CheckoutCancel from "./pages/CheckoutCancel";
-
-// ✅ Jaunais imports uz Terms lapu
 import Terms from "./pages/Terms";
+import PrivacyPolicy from "./pages/PrivacyPolicy"; // ✅ Importē Privacy Policy
 
 const queryClient = new QueryClient();
 
@@ -33,9 +32,8 @@ const App = () => (
           <Route path="/data-deletion" element={<DataDeletion />} />
           <Route path="/checkout-success" element={<Success />} />
           <Route path="/checkout-cancel" element={<CheckoutCancel />} />
-
-          {/* ✅ Terms and Conditions route */}
           <Route path="/terms" element={<Terms />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} /> {/* ✅ Privacy Policy route */}
 
           <Route
             path="/generate"
@@ -53,7 +51,6 @@ const App = () => (
               </ProtectedRoute>
             }
           />
-
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
