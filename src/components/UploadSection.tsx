@@ -11,14 +11,11 @@ import { v4 as uuidv4 } from "uuid";
 const UploadSection = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [environment, setEnvironment] = useState('');
-  const [ratio, setRatio] = useState('');
-  const [duration, setDuration] = useState('');
   const [loading, setLoading] = useState(false);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Action is fixed to "moves"
-  const [action] = useState('moves');
+  const [action] = useState('moves'); // fixed action
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -31,10 +28,13 @@ const UploadSection = () => {
     setError(null);
     setVideoUrl(null);
 
-    if (!selectedFile || !environment || !ratio || !duration) {
-      setError('Please fill in all fields before generating!');
+    if (!selectedFile || !environment) {
+      setError('Please upload a drawing and choose an environment before generating!');
       return;
     }
+
+    const duration = '5';
+    const ratio = '720:1280';
 
     try {
       setLoading(true);
@@ -148,34 +148,6 @@ const UploadSection = () => {
                   <SelectItem value="jungle">Jungle</SelectItem>
                   <SelectItem value="desert">Desert</SelectItem>
                   <SelectItem value="village">Village</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Aspect Ratio */}
-            <div className="space-y-2">
-              <label className="text-lg font-semibold text-gray-900">🔹 Choose Video Aspect Ratio:</label>
-              <Select value={ratio} onValueChange={setRatio}>
-                <SelectTrigger className="w-full h-12 text-lg">
-                  <SelectValue placeholder="Select aspect ratio..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="720:1280">Portrait (9:16)</SelectItem>
-                  <SelectItem value="1280:720">Landscape (16:9)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Duration */}
-            <div className="space-y-2">
-              <label className="text-lg font-semibold text-gray-900">🔹 Choose Video Duration:</label>
-              <Select value={duration} onValueChange={setDuration}>
-                <SelectTrigger className="w-full h-12 text-lg">
-                  <SelectValue placeholder="Select duration..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="5">5 seconds</SelectItem>
-                  <SelectItem value="10">10 seconds</SelectItem>
                 </SelectContent>
               </Select>
             </div>
