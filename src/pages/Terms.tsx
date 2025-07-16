@@ -1,8 +1,9 @@
 import React from "react";
+import { Button } from "@/components/ui/button"; // pārliecinies, ka šī poga eksistē
 
 const Terms = () => {
   return (
-    <div className="max-w-4xl mx-auto py-20 px-4 text-gray-900">
+    <div className="max-w-4xl mx-auto py-20 px-4 text-gray-900 text-left">
       <h1 className="text-4xl font-bold mb-6 text-center">Terms and Conditions</h1>
 
       <p><strong>Effective Date:</strong> July 16, 2025</p>
@@ -57,8 +58,18 @@ const Terms = () => {
 
       <h2 className="mt-6 font-semibold text-lg">10. Contact Us</h2>
       <p>
-        If you have any questions about these Terms, please contact us at: <strong>alivorolive@gmail.com</strong>
+        If you have any questions about these Terms, please contact us at: <strong>alivoro.help@gmail.com</strong>
       </p>
+
+      {/* 🟣 Back to Home button */}
+      <div className="mt-10 text-center">
+        <Button
+          onClick={() => (window.location.href = "/")}
+          className="bg-gray-800 text-white px-6 py-3 rounded-full hover:bg-gray-900 transition-colors font-semibold"
+        >
+          🔙 Back to Home
+        </Button>
+      </div>
     </div>
   );
 };
