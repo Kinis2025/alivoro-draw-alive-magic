@@ -6,7 +6,7 @@ const Footer = () => {
   const links = [
     { title: "About", to: "#about" },
     { title: "Pricing", to: "/pricing" },
-    { title: "Contact", to: "#contact" },
+    { title: "Contact", to: "/contact" },
     { title: "Terms of Service", to: "/terms" },
     { title: "Privacy Policy", to: "/privacy" },
   ];
@@ -41,7 +41,7 @@ const Footer = () => {
             creative families everywhere
           </p>
           <p className="text-gray-500 text-sm mt-2">
-            © 2024 Alivoro. All rights reserved.
+            © 2025 Alivoro. All rights reserved.
           </p>
         </div>
       </div>
