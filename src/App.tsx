@@ -13,9 +13,11 @@ import DataDeletion from "./pages/DataDeletion";
 import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 
-// ✅ Importē stripe success un cancel lapas
 import Success from "./pages/Success";
 import CheckoutCancel from "./pages/CheckoutCancel";
+
+// ✅ Jaunais imports uz Terms lapu
+import Terms from "./pages/Terms";
 
 const queryClient = new QueryClient();
 
@@ -29,14 +31,12 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
           <Route path="/data-deletion" element={<DataDeletion />} />
-
-          {/* ✅ Stripe checkout success route */}
           <Route path="/checkout-success" element={<Success />} />
-
-          {/* ✅ Stripe checkout cancel route */}
           <Route path="/checkout-cancel" element={<CheckoutCancel />} />
 
-          {/* ✅ Protected generate route */}
+          {/* ✅ Terms and Conditions route */}
+          <Route path="/terms" element={<Terms />} />
+
           <Route
             path="/generate"
             element={
@@ -45,8 +45,6 @@ const App = () => (
               </ProtectedRoute>
             }
           />
-
-          {/* ✅ Protected dashboard route */}
           <Route
             path="/dashboard"
             element={
@@ -56,7 +54,6 @@ const App = () => (
             }
           />
 
-          {/* ✅ Catch-all route */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
