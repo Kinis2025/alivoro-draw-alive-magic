@@ -12,7 +12,7 @@ const port = process.env.PORT || 10000;
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 app.use(cors());
-app.use(express.json()); // JSON atbalsts
+app.use(express.json());
 
 /**
  * Poll Runway task status until completion
@@ -22,27 +22,32 @@ async function pollTaskStatus(taskId, apiKey) {
   const intervalMs = 3000;
 
   for (let i = 0; i < maxRetries; i++) {
-    const res = await fetch(`https://api.dev.runwayml.com/v1/tasks/${taskId}`, {
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'X-Runway-Version': '2024-11-06',
-      },
-    });
+    try {
+      const res = await fetch(`https://api.dev.runwayml.com/v1/tasks/${taskId}`, {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          'X-Runway-Version': '2024-11-06',
+        },
+      });
 
-    if (!res.ok) {
-      throw new Error(`Failed to fetch task status: ${res.statusText}`);
-    }
+      if (!res.ok) {
+        console.error(`⏳ Polling attempt ${i + 1}: status ${res.status}`);
+        throw new Error(`Failed to fetch task status: ${res.statusText}`);
+      }
 
-    const json = await res.json();
-    if (json.status === 'SUCCEEDED') {
-      return json;
-    }
-    if (json.status === 'FAILED' || json.status === 'CANCELED') {
-      throw new Error(`Task ${json.status.toLowerCase()}`);
+      const json = await res.json();
+      if (json.status === 'SUCCEEDED') return json;
+      if (json.status === 'FAILED' || json.status === 'CANCELED') {
+        throw new Error(`Task ${json.status.toLowerCase()}`);
+      }
+
+    } catch (err) {
+      console.warn(`⚠️ Polling error (attempt ${i + 1}):`, err.message);
     }
 
     await new Promise((r) => setTimeout(r, intervalMs));
   }
+
   throw new Error('Task polling timed out');
 }
 
@@ -85,9 +90,11 @@ app.post('/api/generate', async (req, res) => {
       throw new Error(`Failed to download image from URL: ${imageUrl}`);
     }
 
-    const imageBuffer = await imageResponse.buffer();
+    // ✅ Use arrayBuffer (not buffer()) to avoid deprecation warning
+    const imageArrayBuffer = await imageResponse.arrayBuffer();
+    const imageBuffer = Buffer.from(imageArrayBuffer);
 
-    // 🔧 Resize using Sharp
+    // 🔧 Resize image
     const resizedImageBuffer = await sharp(imageBuffer)
       .resize({ width, height, fit: 'contain', background: { r: 0, g: 0, b: 0 } })
       .toFormat('jpeg')
@@ -96,7 +103,7 @@ app.post('/api/generate', async (req, res) => {
     const base64Image = resizedImageBuffer.toString('base64');
     const dataUri = `data:image/jpeg;base64,${base64Image}`;
 
-    // 🚀 Call Runway API
+    // 🚀 Create Runway task
     const startResponse = await fetch('https://api.dev.runwayml.com/v1/image_to_video', {
       method: 'POST',
       headers: {
@@ -123,7 +130,9 @@ app.post('/api/generate', async (req, res) => {
 
     console.log('✅ Runway video task created:', data);
 
-    // ⏳ Poll for result
+    // 🕒 Wait 2 seconds before polling
+    await new Promise((r) => setTimeout(r, 2000));
+
     const taskResult = await pollTaskStatus(data.id, process.env.RUNWAY_API_KEY);
 
     console.log('✅ Task completed:', taskResult);
@@ -153,7 +162,7 @@ app.post('/api/create-checkout-session', async (req, res) => {
               name: 'Video Generation',
               description: 'Generate an AI video from your drawing',
             },
-            unit_amount: 500, // €5.00
+            unit_amount: 500,
           },
           quantity: 1,
         },
